@@ -1,0 +1,421 @@
+/* Specific styles for editExam.php */
+
+/* Overall Page Layout - Ensure full viewport height and flexible layout */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%; /* Ensure html and body take full viewport height */
+    font-family: 'Inter', sans-serif; /* Consistent font */
+    background-color: #f0f2f5; /* Light gray background for the page */
+    display: flex;
+    flex-direction: column; /* Make body a flex container for its children */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Header Styling - For "Edit Exam" page */
+.page-header {
+    background-color: #2c3e50; /* Dark blue-gray */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between; /* Space out back button and title */
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky; /* Make header sticky */
+    top: 0;
+    z-index: 1000; /* Ensure it stays on top */
+    width: 100%; /* Ensure header takes full width */
+    box-sizing: border-box; /* Include padding in header's width */
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    flex-grow: 1; /* Allow title to take available space */
+    margin-left: -150px;
+    text-align: center; /* Center the title in the remaining space */
+}
+
+/* Main Content Container - Encapsulates the form section */
+.container {
+    flex-grow: 1; /* Allow container to grow and push footer down if any */
+    display: flex; /* Use flex to center its direct child (form-section) */
+    justify-content: center; /* Center horizontally */
+    align-items: flex-start; /* Align to top of available space */
+    padding: 30px 20px; /* Consistent padding around the main content */
+    box-sizing: border-box; /* Include padding in element's total width and height */
+    overflow-y: auto; /* Allow vertical scrolling if content overflows */
+}
+.title_box {
+    background-color: #f8f9fa; /* Slightly lighter background */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle shadow */
+    padding: 25px; /* Ample padding */
+    margin-bottom: 20px; /* Space below the title box */
+    display: flex; /* Use flex for internal layout of title/instruction/year/section/code */
+    flex-direction: column;
+    gap: 15px; /* Space between inputs/labels */
+    border-left: 5px solid #007bff; /* Accent border, blue to match save button */
+}
+
+.title_box label {
+    font-weight: bold;
+    color: #34495e;
+    font-size: 1.05rem;
+    margin-bottom: 5px; /* Space between label and input */
+}
+
+.title_box input[type="text"],
+.title_box select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.title_box input[type="text"]:focus,
+.title_box select:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+/* Form Section Styling */
+.form-section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 900px; /* Max width for readability */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    box-sizing: border-box;
+}
+
+/* Adjusting some elements for edit form */
+.form-group-inline {
+    flex: 1; /* Make year/section groups equal width */
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group-inline label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+    font-size: 1.05rem;
+}
+
+/* Question Block styling - similar to create_exam.css but with remove button */
+.question-block {
+    position: relative; /* For absolute positioning of remove button */
+    padding: 25px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px; /* Space between questions */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-left: 5px solid #2980b9; /* Accent border */
+}
+
+.question-block label {
+    font-weight: bold;
+    color: #555;
+}
+
+.question-block input[type="text"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.question-block input[type="text"]:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+.question-block h3 {
+    font-size: 1.4rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #ced4da;
+    padding-bottom: 10px;
+}
+
+.choices-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.choices-section h4 {
+    color: #555;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.choice-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.choice-item input[type="text"] {
+    flex-grow: 1; /* Allow input to take most space */
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.remove-choice-btn, .remove-question-btn {
+    padding: 8px 12px;
+    background-color: #dc3545; /* Red */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.remove-choice-btn:hover, .remove-question-btn:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Specific button for "Add New Question" */
+#add_question_btn {
+    align-self: flex-start; /* Align left below the form */
+    margin-top: 20px;
+    background-color: #28a745; /* Green */
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#add_question_btn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Save Exam Button */
+#save_exam_btn {
+    align-self: flex-end; /* Align to the right */
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+#save_exam_btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Message Area (re-using from create_exam/get_exam CSS) */
+.message-area {
+    margin-bottom: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    text-align: center;
+    display: block; /* Show messages dynamically */
+}
+
+.message-area.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message-area.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message-area.loading {
+    background-color: #e2f0fb;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    animation: pulse 1.5s infinite;
+}
+
+.modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 2000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Start hidden for fade-in effect */
+            visibility: hidden; /* Hide completely */
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+            display: flex; /* Now it's flex, so justify/align center applies */
+        }
+        .modal-content {
+            background-color: #ffffff;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        .modal-content p {
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .modal-buttons .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .modal-buttons .btn-confirm {
+            background-color: #28a745; /* Green */
+            color: white;
+        }
+        .modal-buttons .btn-confirm:hover {
+            background-color: #218838;
+        }
+        .modal-buttons .btn-cancel {
+            background-color: #6c757d; /* Grey */
+            color: white;
+        }
+        .modal-buttons .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Buttons for delete attempts */
+        .delete-attempts-btn {
+            background-color: #dc3545; /* Red */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 20px; /* Space above */
+            align-self: flex-start; /* Align left */
+        }
+        .delete-attempts-btn:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+/* Make form-group-inline take full width on small screens */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
+    }
+    .page-header {
+        flex-direction: column; /* Stack items vertically */
+        padding: 10px 15px;
+    }
+    /* Assuming .back-button styles are global and don't need explicit media query here */
+    .page-header h1 {
+        font-size: 1.5rem;
+        margin-top: 10px; /* Add space between button and title when stacked */
+    }
+
+    .form-section {
+        padding: 30px 20px;
+    }
+
+    /* Keep these specific overrides as they might be intentional for form elements */
+    .form-row {
+        flex-direction: column;
+    }
+    .form-group-inline {
+        width: 100%;
+    }
+    #add_question_btn, #save_exam_btn {
+        width: 100%;
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px 10px;
+    }
+    .page-header h1 {
+        font-size: 1.3rem;
+    }
+    .form-section {
+        padding: 20px 15px;
+    }
+
+    .question-block h3 {
+        font-size: 1.2rem;
+    }
+
+    .question-block .question-text {
+        font-size: 1rem;
+    }
+
+    .choice-item {
+        padding: 10px;
+    }
+
+    .choice-item label {
+        font-size: 0.9rem;
+    }
+}

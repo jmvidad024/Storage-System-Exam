@@ -1,0 +1,400 @@
+body {
+    font-family: Arial, sans-serif; /* Keep consistent with your base font */
+    background-color: #f4f7f6; /* Light grey background */
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh; /* Ensure body takes full viewport height */
+}
+
+.page-header {
+    background-color: #2c3e50; /* Dark blue/grey */
+    color: #ecf0f1; /* Light text color */
+    padding: 1.2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    /* Remove 'gap: 25px;' from here */ /* Let the h1 flex-grow handle spacing */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    flex-grow: 1; /* Allow title to take remaining space, centering it */
+    text-align: center;
+    margin-left: -120px;
+}
+
+.back-button {
+    background-color: #34495e; /* Slightly lighter dark blue for the button */
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none; /* Remove underline from link */
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex; /* For arrow icon and text alignment */
+    align-items: center;
+    gap: 8px; /* Space between arrow and text */
+    font-weight: bold;
+}
+
+.back-button:hover {
+    background-color: #4a627a; /* Darker blue on hover */
+    transform: translateX(-3px); /* Subtle slide effect to the left */
+}
+
+
+.form_layout {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.form_layout form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title_box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form_layout input[type="text"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form_layout input[type="text"]:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+.form_layout input[type="text"]::placeholder {
+    color: #999;
+}
+
+#add_button, #submit_button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-option-btn {
+    padding: 10px 15px;
+    background-color: #e1f5fe;
+    color: #0288d1;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-right: 10px;
+}
+
+
+.add-option-btn:hover {
+    background-color: #b3e5fc;
+    transform: translateY(-1px);
+}
+
+
+#submit_button {
+    background-color: #4a90e2;
+    color: white;
+}
+
+#submit_button:hover {
+    background-color: #3a7bc8;
+    transform: translateY(-1px);
+}
+
+/* Additional styles for dynamic question elements */
+.question_container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Style for Add Option button */
+button[type="button"][id^="add_option"] {
+    padding: 10px 15px;
+    background-color: #e1f5fe;
+    color: #0288d1;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    align-self: flex-start;
+}
+
+button[type="button"][id^="add_option"]:hover {
+    background-color: #b3e5fc;
+    transform: translateY(-1px);
+}
+
+/* Style for Remove Choice button */
+.remove-choice-btn {
+    padding: 8px 12px;
+    background-color: #ffebee;
+    color: #d32f2f;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button#remove_choice:hover, button[id^="remove_choice"]:hover {
+    background-color: #ffcdd2;
+}
+
+/* Style for Remove Question button */
+.remove-question-btn {
+    padding: 10px 15px;
+    background-color: #ffebee;
+    color: #d32f2f;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    align-self: flex-start;
+    margin-top: 10px;
+}
+
+.remove-question-btn:hover {
+    background-color: #ffcdd2;
+    transform: translateY(-1px);
+}
+
+/* Style for choice inputs */
+input[placeholder="Enter Choice"] {
+    width: calc(100% - 120px);
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    display: inline-block;
+}
+
+/* Container for choice + remove button */
+.choice-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Right answer input styling */
+input[placeholder="Enter Right Answer"] {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #c8e6c9;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #f1f8e9;
+}
+
+/* Question input styling */
+input[placeholder="Enter Question"] {
+    font-weight: bold;
+    border-left: 4px solid #4a90e2;
+}
+
+.form_layout select {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #fff;
+}
+
+.form_layout select:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+.modal {
+    display: none; /* This is the ONLY display property for initial hiding */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    /* REMOVE THE 'display: flex;' LINE FROM HERE */
+    justify-content: center; /* These will correctly center content when JS applies display: flex */
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more specific, e.g., 500px */
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    text-align: center;
+}
+
+/* Add to your existing create_exam.css */
+.form-summary-display {
+    text-align: left; /* Align text within the summary */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    max-height: 300px; /* Limit height for scrollability */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+.form-summary-display h3 {
+    color: #4a90e2; /* Blue for question titles */
+    margin-top: 15px;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.form-summary-display ul {
+    list-style: none; /* Remove bullet points */
+    padding-left: 0;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.form-summary-display li {
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.form-summary-display .right-answer {
+    font-weight: bold;
+    color: #4CAF50; /* Green for right answer */
+}
+
+.form-summary-display .summary-title,
+.form-summary-display .summary-instruction {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.8em;
+}
+
+.modal-content p {
+    margin-bottom: 25px;
+    font-size: 1.1em;
+    color: #555;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Space between buttons */
+}
+
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.confirm-btn {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+.confirm-btn:hover {
+    background-color: #45a049;
+}
+
+.cancel-btn {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #da190b;
+}
+
+
+
+
+/* Responsive adjustments for dynamic elements */
+@media (max-width: 600px) {
+    .question_container {
+        padding: 15px;
+    }
+    
+    input[placeholder="Enter Choice"] {
+        width: 100%;
+    }
+    
+    .choice-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    button#remove_choice, button[id^="remove_choice"] {
+        margin-left: 0;
+        margin-top: 5px;
+        width: 100%;
+    }
+}
+

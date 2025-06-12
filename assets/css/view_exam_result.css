@@ -1,0 +1,262 @@
+/* Specific styles for viewExamResults.php */
+
+/* Overall Page Layout - Ensure container is centered and has proper width */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%; /* Ensure html and body take full viewport height */
+    font-family: 'Inter', sans-serif; /* Prefer Inter font */
+    background-color: #f0f2f5; /* Light gray background for the page */
+    display: flex;
+    flex-direction: column; /* Make body a flex container for its children */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Header Styling - For "Exam Results" page */
+.page-header {
+    background-color: #2c3e50; /* Dark blue-gray */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between; /* Space out back button and title */
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky; /* Make header sticky */
+    top: 0;
+    z-index: 1000; /* Ensure it stays on top */
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    flex-grow: 1; /* Allow title to take available space */
+    text-align: center; /* Center the title, if space allows */
+    margin-left: -120px; /* Fine-tune this based on back-button width */
+}
+
+/* Main Content Container */
+.container {
+    max-width: 960px; /* Consistent max-width */
+    width: 100%; /* Ensure it takes full width up to max-width */
+    margin: 30px auto; /* Center container with top/bottom margin */
+    padding: 0 20px; /* Horizontal padding for smaller screens */
+    flex-grow: 1; /* Allow container to grow and push footer down if any */
+    box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+.back-button {
+    background-color: #34495e; /* Slightly lighter dark blue for the button */
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none; /* Remove underline from link */
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex; /* For arrow icon and text alignment */
+    align-items: center;
+    gap: 8px; /* Space between arrow and text */
+    font-weight: bold;
+}
+
+.back-button:hover {
+    background-color: #4a627a; /* Darker blue on hover */
+    transform: translateX(-3px); /* Subtle slide effect to the left */
+}
+
+/* Results Summary Section */
+.results-summary-section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-sizing: border-box;
+}
+
+.results-summary-section h2 {
+    color: #2c3e50;
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+}
+
+.results-summary-section .exam-code,
+.results-summary-section .exam-info {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.results-summary-section .score-display {
+    color: #28a745; /* Green for score */
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+/* Questions Review Section */
+.questions-review-section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.questions-review-section h3 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 15px;
+}
+
+.question-review-block {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 5px solid; /* Will be set by correct/incorrect classes */
+}
+
+.question-review-block.correct-answer {
+    border-color: #28a745; /* Green for correct */
+}
+
+.question-review-block.incorrect-answer {
+    border-color: #dc3545; /* Red for incorrect */
+}
+
+.question-review-block h4 {
+    color: #34495e;
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+}
+
+.choices-display ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+.choices-display li {
+    background-color: #eef5f9;
+    border: 1px solid #d8e6f0;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.choices-display li.correct-choice {
+    background-color: #d4edda; /* Light green for correct option */
+    border-color: #28a745;
+    font-weight: bold;
+    color: #155724;
+}
+
+.choices-display li.student-selected-incorrect {
+    background-color: #f8d7da; /* Light red for student's incorrect selection */
+    border-color: #dc3545;
+    font-weight: bold;
+    color: #721c24;
+}
+
+
+.your-answer, .correct-answer-display, .question-score {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.your-answer span {
+    color: #007bff; /* Blue for student's answer */
+}
+
+.correct-answer-display span {
+    color: #28a745; /* Green for correct answer */
+}
+
+.question-score {
+    color: #444;
+}
+
+.no-questions-message {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 50px;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+    .page-header {
+        flex-direction: column; /* Stack items vertically */
+        padding: 10px 15px;
+    }
+    .page-header .back-button {
+        margin-bottom: 10px;
+        align-self: flex-start; /* Align button to start */
+    }
+    .page-header h1 {
+        font-size: 1.5rem;
+        text-align: left; /* Align title to left on small screens */
+    }
+
+    .results-summary-section,
+    .questions-review-section {
+        padding: 20px;
+    }
+
+    .results-summary-section h2 {
+        font-size: 2.2rem;
+    }
+
+    .results-summary-section .score-display {
+        font-size: 1.8rem;
+    }
+
+    .questions-review-section h3 {
+        font-size: 1.6rem;
+    }
+
+    .question-review-block h4 {
+        font-size: 1.2rem;
+    }
+
+    .your-answer, .correct-answer-display, .question-score {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 15px auto;
+        padding: 0 10px;
+    }
+    .page-header h1 {
+        font-size: 1.3rem;
+    }
+    .results-summary-section h2 {
+        font-size: 1.8rem;
+    }
+    .results-summary-section .score-display {
+        font-size: 1.5rem;
+    }
+    .questions-review-section h3 {
+        font-size: 1.4rem;
+    }
+    .question-review-block h4 {
+        font-size: 1.1rem;
+    }
+}
