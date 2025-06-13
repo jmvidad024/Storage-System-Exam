@@ -195,6 +195,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script src="/Storage-System/assets/js/create_account.js"></script>
+    <script src="../assets/js/create_account.js"></script>
 </body>
 </html>

@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             display: <?php echo isset($error) ? 'block' : 'none'; ?>;
         }
     </style>
-    <link rel="stylesheet" href="/Storage-System/assets/css/login.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
 </head>
 <body>
     <div class="login-container">
@@ -74,6 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
     
-    <script src="/Storage-System/assets/js/login.js"></script>
+    <script src="../assets/js/login.js"></script>
 </body>
 </html>

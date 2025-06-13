@@ -18,7 +18,7 @@ AuthMiddleware::requireRole($user, ['admin', 'faculty']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Storage-System/assets/css/create_exam.css">
+    <link rel="stylesheet" href="../assets/css/create_exam.css">
     <title>Create Exam</title>
 </head>
 <body>

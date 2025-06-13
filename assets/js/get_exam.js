@@ -40,7 +40,7 @@ get_exam_form.addEventListener('submit', (e) => {
     resultDiv.innerHTML = ''; // Clear previous content
     actionMessageArea.style.display = 'none'; // Hide any previous action messages
 
-    fetch(`/Storage-System/api/exam.php?code=${encodeURIComponent(code)}`)
+    fetch(`../api/exam.php?code=${encodeURIComponent(code)}`)
     .then(res => {
         if (!res.ok) {
             return res.json().then(errorData => {
