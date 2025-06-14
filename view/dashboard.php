@@ -75,6 +75,7 @@ if (isset($_POST['logout'])) {
             <?php if ($userRole === 'admin' || $userRole === 'faculty'): ?>
                 <li><a href="createExam.php" class="nav-link">Create Exam</a></li>
                 <li><a href="getExam.php" class="nav-link">Manage Exams</a></li>
+                <li><a href="manageCourses.php" class="nav-link">Manage Courses & Sections</a></li>
             <?php endif; ?>
             <?php if ($userRole === 'admin'): ?>
                 <li><a href="createAccount.php" class="nav-link">Create Account</a></li>

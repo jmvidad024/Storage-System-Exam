@@ -18,14 +18,14 @@ AuthMiddleware::requireRole($user, ['admin', 'faculty']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/create_exam.css">
+    <link rel="stylesheet" href="../assets/css/create_exam.css?v=2">
     <title>Create Exam</title>
 </head>
 <body>
     
 <header class="page-header">
         <a href="dashboard.php" class="back-button">&larr; Back to Dashboard</a>
-        <h1>Create New Exam</h1>
+        <h1>Create Exam</h1>
 </header>
 
 <div class="form_layout">

@@ -83,7 +83,7 @@ if ($attempt_details && $attempt_details['is_completed']) {
          data-user-id="<?php echo htmlspecialchars($user_id); ?>"
          data-attempt-id="<?php echo htmlspecialchars($attempt_id); ?>"></div> <!-- NEW: Pass attempt_id -->
 
-    <script src="/Storage-System/assets/js/take_exam.js">
+    <script src="../assets/js/take_exam.js">
         
     </script>
 </body>

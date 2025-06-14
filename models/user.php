@@ -1,5 +1,7 @@
 <?php
 class User {
+    private $table_name = "users"; // Your students table name
+
     private $id;
     private $username;
     private $name; 
@@ -179,6 +181,40 @@ class User {
         return false;
     }
 
-    
+    public function updateNameAndEmail($id, $name, $email) {
+        $query = "UPDATE " . $this->table_name . " SET name = ?, email = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("User Model updateNameAndEmail - Prepare failed: " . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param("ssi", $name, $email, $id);
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        }
+        error_log("User Model updateNameAndEmail - Execute failed: " . $stmt->error);
+        $stmt->close();
+        return false;
+    }
+
+    public function delete($id) {
+        $conn = $this->db->getConnection(); // Get the mysqli connection object for this method
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
+        $stmt = $conn->prepare($query); // Use local $conn here
+        if (!$stmt) {
+            error_log("User Model Delete - Prepare failed: " . $conn->error); // Log error from $conn
+            return false;
+        }
+
+        $stmt->bind_param("i", $id);
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        }
+        error_log("User Model Delete - Execute failed: " . $stmt->error);
+        $stmt->close();
+        return false;
+    }
 }
 ?>

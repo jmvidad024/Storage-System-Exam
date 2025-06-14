@@ -1,0 +1,472 @@
+/* General styling for the new Course Management Page */
+
+.course-management-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 30px auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    padding: 30px;
+}
+
+.course-management-container .loading-indicator,
+.course-management-container .error-message {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #6c757d;
+}
+
+.course-management-container .error-message {
+    color: #dc3545;
+    font-weight: bold;
+    display: none; /* Hidden by default, shown by JS on error */
+}
+
+.course-management-container .no-data-message {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-style: italic;
+}
+
+/* Course List Styling */
+.course-list {
+    margin-top: 20px;
+}
+
+.course-block {
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden; /* Ensures border-radius applies to children */
+}
+
+.course-header,
+.year-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #e9ecef;
+    cursor: pointer;
+    border-bottom: 1px solid #dcdcdc;
+    transition: background-color 0.2s ease;
+}
+
+.course-header:hover,
+.year-header:hover {
+    background-color: #dee2e6;
+}
+
+.course-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #2c3e50;
+}
+
+.year-header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #34495e;
+}
+
+.toggle-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: transform 0.2s ease;
+}
+
+/* Hidden content */
+.years-container.hidden,
+.sections-container.hidden {
+    display: none;
+}
+
+.years-container,
+.sections-container {
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border-top: 1px solid #f0f0f0; /* Subtler border for nested containers */
+}
+
+.years-container .year-block {
+    margin-bottom: 10px;
+    border: 1px solid #f2f2f2;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.sections-container .section-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.sections-container .section-list li {
+    padding: 10px 15px;
+    border-bottom: 1px dashed #f5f5f5;
+    color: #555;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Added for clickability */
+    transition: background-color 0.2s ease;
+}
+
+.sections-container .section-list li:last-child {
+    border-bottom: none;
+}
+
+.sections-container .section-list li.clickable-section:hover {
+    background-color: #f0f0f0; /* Highlight on hover for clickable sections */
+}
+
+.student-count { /* Changed from .exam-count to .student-count */
+    background-color: #007bff;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* Modal Styles - Shared between student list, edit, and delete confirmation */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 2000; /* Sit on top of everything */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal.show {
+    display: flex; /* Show using flex for centering */
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    position: relative;
+    width: 90%;
+    max-width: 600px; /* Default max-width for smaller modals (edit/delete confirm) */
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Specific class for larger modal for student list */
+.large-modal {
+    max-width: 900px; /* Wider for the student list table */
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+.modal-content h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+.modal-body {
+    margin-top: 15px;
+}
+
+.modal-body .loading-indicator,
+.modal-body .error-message {
+    padding: 10px;
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+}
+
+.modal-body .error-message {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Student Table Styling within Modal */
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.student-table th,
+.student-table td {
+    padding: 12px 15px;
+    border: 1px solid #eee;
+    text-align: left;
+}
+
+.student-table th {
+    background-color: #f5f5f5;
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.student-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.student-table tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+.student-table .no-students-message {
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    padding: 20px;
+}
+
+/* Action Buttons (Edit/Delete) in Student Table */
+.student-table .actions {
+    white-space: nowrap; /* Keep buttons on one line */
+    text-align: center; /* Center buttons within their cell */
+}
+
+.student-table .btn-action {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    margin: 0 3px; /* Small space between buttons */
+    display: inline-block; /* For button styling */
+    min-width: 60px; /* Ensure buttons aren't too small */
+}
+
+.student-table .btn-edit {
+    background-color: #007bff; /* Blue */
+    color: white;
+}
+.student-table .btn-edit:hover {
+    background-color: #0056b3;
+}
+
+.student-table .btn-delete {
+    background-color: #dc3545; /* Red */
+    color: white;
+}
+.student-table .btn-delete:hover {
+    background-color: #c82333;
+}
+
+/* Edit Form Styling within Modal */
+.edit-form .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.edit-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.edit-form input[type="text"],
+.edit-form input[type="email"],
+.edit-form input[type="number"] {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #495057;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edit-form input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    outline: none;
+}
+
+.edit-form .btn-primary {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.edit-form .btn-primary:hover {
+    background-color: #218838;
+}
+
+/* Message Area for Modals (reusing existing styles) */
+.modal .message-area {
+    margin-top: 15px;
+    margin-bottom: 0;
+    padding: 10px;
+    font-size: 0.95rem;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .course-management-container {
+        padding: 20px;
+        margin: 20px auto;
+    }
+
+    .course-header,
+    .year-header {
+        padding: 12px 15px;
+    }
+
+    .course-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .year-header h4 {
+        font-size: 1rem;
+    }
+
+    .sections-container .section-list li {
+        font-size: 0.9rem;
+    }
+
+    .student-count {
+        padding: 3px 6px;
+        font-size: 0.8rem;
+    }
+
+    /* Modal responsiveness */
+    .modal-content {
+        padding: 20px;
+        width: 95%; /* Make it wider on small screens */
+    }
+
+    .large-modal {
+        max-width: 95%; /* Adjust for larger modal on mobile */
+    }
+
+    .student-table th,
+    .student-table td {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+
+    /* Stack table columns on very small screens for student table */
+    .student-table, .student-table tbody, .student-table tr, .student-table td {
+        display: block;
+        width: 100%;
+    }
+    .student-table thead {
+        display: none; /* Hide header on mobile for stacked table */
+    }
+    .student-table tr {
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .student-table td {
+        text-align: right;
+        padding-left: 50%; /* Space for pseudo-label */
+        position: relative;
+        border: none;
+        border-bottom: 1px dashed #eee;
+        word-wrap: break-word; /* Allow long words to break */
+        white-space: normal;   /* Allow normal whitespace wrapping */
+    }
+    .student-table td::before {
+        content: attr(data-label); /* Use data-label for the label */
+        position: absolute;
+        left: 10px;
+        width: calc(50% - 20px);
+        text-align: left;
+        font-weight: bold;
+        color: #555;
+        font-size: 0.8rem;
+    }
+    .student-table td:last-child {
+        border-bottom: none;
+    }
+
+    .student-table .actions {
+        display: flex;
+        flex-wrap: wrap; /* Allow buttons to wrap */
+        justify-content: center;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+        margin-top: 5px;
+    }
+
+    .student-table .btn-action {
+        flex: 1 1 auto; /* Allow buttons to grow and shrink */
+        margin: 5px; /* Adjust margin for wrapped buttons */
+    }
+
+    .edit-form .btn-primary {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .course-management-container {
+        padding: 15px;
+        margin: 15px auto;
+    }
+
+    .course-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .year-header h4 {
+        font-size: 0.95rem;
+    }
+
+    .modal-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .edit-form input[type="text"],
+    .edit-form input[type="email"],
+    .edit-form input[type="number"] {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+}
