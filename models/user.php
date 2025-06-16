@@ -11,12 +11,13 @@ class User {
     private $db;
 
     public function __construct(Database $database) {
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
-        $this->db = $database;
-        $this->loadFromSession();
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
     }
+    $this->db = $database;
+    $this->conn = $database->getConnection(); // <---- ADD THIS LINE
+    $this->loadFromSession();
+}
 
     public function login($username, $password) {
         // Use your existing database connection
@@ -186,6 +187,7 @@ class User {
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("User Model updateNameAndEmail - Prepare failed: " . $this->conn->error);
+            echo(['error'=>"here"]);
             return false;
         }
         $stmt->bind_param("ssi", $name, $email, $id);

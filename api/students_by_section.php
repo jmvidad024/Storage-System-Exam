@@ -38,8 +38,8 @@ if ($method === 'GET') {
                 s.user_id,          -- user_id is also important for edit operation
                 s.student_id,      -- Real-life student ID
                 s.course AS course_name, -- Aliased for consistency with frontend expectations
-                s.year,    -- Aliased for consistency with frontend expectations
-                s.section, -- Aliased for consistency with frontend expectations
+                s.year AS year_level,    -- Aliased for consistency with frontend expectations
+                s.section AS section_name, -- Aliased for consistency with frontend expectations
                 u.username,
                 u.name,
                 u.email

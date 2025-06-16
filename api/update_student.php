@@ -25,23 +25,39 @@ if ($method === 'PUT') {
     $rawData = file_get_contents("php://input");
     $data = json_decode($rawData, true);
 
-    echo json_encode(["data"=>$data]);
-    // Validate required fields
-    if (
-        !isset($data['id']) || !is_numeric($data['id']) || // This student_id is the PK 'id' of students table
-        !isset($data['user_id']) || !is_numeric($data['user_id']) ||
-        !isset($data['name']) || empty($data['name']) ||
-        !isset($data['email']) || empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL) ||
-        !isset($data['course']) || empty($data['course']) ||
-        !isset($data['year']) || !is_numeric($data['year']) ||
-        !isset($data['section']) || empty($data['section'])
-    ) {
+    $errors = [];
+
+    if (!isset($data['student_id'])) $errors[] = "student_id is not set.";
+    else if (!is_numeric($data['student_id'])) $errors[] = "student_id is not numeric.";
+
+    if (!isset($data['user_id'])) $errors[] = "user_id is not set.";
+    else if (!is_numeric($data['user_id'])) $errors[] = "user_id is not numeric.";
+
+    if (!isset($data['name'])) $errors[] = "name is not set.";
+    else if (empty($data['name'])) $errors[] = "name is empty.";
+
+    if (!isset($data['email'])) $errors[] = "email is not set.";
+    else if (empty($data['email'])) $errors[] = "email is empty.";
+    else if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) $errors[] = "email is invalid.";
+
+    if (!isset($data['course'])) $errors[] = "course is not set.";
+    else if (empty($data['course'])) $errors[] = "course is empty.";
+
+    if (!isset($data['year'])) $errors[] = "year is not set.";
+    else if (!is_numeric($data['year'])) $errors[] = "year is not numeric."; // '1' is numeric
+
+    if (!isset($data['section'])) $errors[] = "section is not set.";
+    else if (empty($data['section'])) $errors[] = "section is empty.";
+
+    if (!empty($errors)) {
         http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Invalid or missing required data for update."]);
+        echo json_encode(["status" => "error", "message" => "Invalid or missing required data for update.", "details" => $errors, "received_data" => $data]);
         exit();
     }
 
-    $student_pk_id = (int)$data['student_id']; // Primary key 'id' from students table
+    // REMOVE THIS LINE: echo json_encode(['error'=>$errors]);
+
+    $student_pk_id = (int)$data['student_id'];
     $user_id = (int)$data['user_id'];
     $name = htmlspecialchars(trim($data['name']));
     $email = htmlspecialchars(trim($data['email']));
@@ -51,14 +67,17 @@ if ($method === 'PUT') {
 
     $conn->begin_transaction(); // Start transaction
 
+
     try {
-        // 1. Update user details (name, email) using the User model
-        if (!$user_model->updateNameAndEmail($user_id, $name, $email)) { // Assuming User model has this method
-             throw new Exception("Failed to update user details.");
+        if (!$user_model->updateNameAndEmail($user_id, $name, $email)) {
+            error_log("fail");
+            throw new Exception("Failed to update user details.");
         }
 
         // 2. Update student details (course, year, section) using the Student model
+        // Assuming Student model has an update method that updates a student by student_pk_id
         if (!$student_model->update($student_pk_id, $course, $year, $section)) {
+            error_log("here");
             throw new Exception("Failed to update student record.");
         }
 

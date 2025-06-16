@@ -75,13 +75,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         loadingIndicator.style.display = 'block';
         errorMessageDiv.style.display = 'none';
         errorMessageDiv.textContent = '';
-        courseListContainer.querySelector('.course-list')?.remove(); // Remove existing list if any
+        courseListContainer.querySelector('.course-list')?.remove(); 
 
         try {
-            const response = await fetch('../api/courses.php'); // Fetch data from the new API endpoint
+            const response = await fetch('../api/courses.php');
             const data = await response.json();
 
-            loadingIndicator.style.display = 'none'; // Hide loading indicator
+            loadingIndicator.style.display = 'none';
 
             if (response.ok && data.status === 'success' && data.data) {
                 renderCourses(data.data);
@@ -153,10 +153,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                             sectionItem.dataset.sectionName = section.section_name;
                             sectionItem.innerHTML = `Section ${section.section_name} <span class="student-count">${section.student_count} students</span>`;
                             
-                            sectionItem.style.cursor = 'pointer'; // Indicate it's clickable
-                            sectionItem.classList.add('clickable-section'); // Add a class for styling
+                            sectionItem.style.cursor = 'pointer';
+                            sectionItem.classList.add('clickable-section');
                             sectionItem.addEventListener('click', () => {
-                                // Store current section data for refreshing after CRUD operations
+
                                 currentSectionData = {
                                     course: course.course_name,
                                     year: year.year_level,
@@ -198,12 +198,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         try {
             const response = await fetch(`../api/students_by_section.php?course=${encodeURIComponent(courseName)}&year=${encodeURIComponent(yearLevel)}&section=${encodeURIComponent(sectionName)}`);
             const data = await response.json();
-
             studentModalLoading.style.display = 'none'; // Hide loading
 
             if (response.ok && data.status === 'success' && data.students) {
                 if (data.students.length > 0) {
                     data.students.forEach(student => {
+                        console.log(student.year_level);
                         const row = document.createElement('tr');
                         // Use student.id (PK from students table) for data-student-id
                         row.innerHTML = `
@@ -218,10 +218,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                                     data-username="${student.username}"
                                     data-name="${student.name}"
                                     data-email="${student.email}"
-                                    data-course="${student.course_name}"   <!-- FIX: Use student.course_name from API response -->
-                                    data-year="${student.year_level}"     <!-- FIX: Use student.year_level from API response -->
-                                    data-section="${student.section_name}">Edit</button> <!-- FIX: Use student.section_name from API response -->
-                                <button class="btn btn-action btn-delete delete-student-btn"
+                                    data-course="${student.course_name}"   data-year="${student.year_level}"      data-section="${student.section_name}">
+                                    Edit</button>
+                                    <button class="btn btn-action btn-delete delete-student-btn"
                                     data-student-id="${student.id}"
                                     data-username="${student.username}">Delete</button>
                             </td>
@@ -259,17 +258,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // NEW FUNCTION: Opens the edit student modal and populates form
     function openEditStudentModal(studentData) {
-        console.log('openEditStudentModal called with studentData:', studentData);
-        console.log('Attempting to set values:');
-        console.log('  editStudentIdInput:', editStudentIdInput, 'Value:', studentData.studentId);
-        console.log('  editUserIdInput:', editUserIdInput, 'Value:', studentData.userId);
-        console.log('  editStudentUsernameInput:', editStudentUsernameInput, 'Value:', studentData.username);
-        console.log('  editStudentNameInput:', editStudentNameInput, 'Value:', studentData.name);
-        console.log('  editStudentEmailInput:', editStudentEmailInput, 'Value:', studentData.email);
-        console.log('  editStudentCourseInput:', editStudentCourseInput, 'Value:', studentData.course_name);
-        console.log('  editStudentYearInput:', editStudentYearInput, 'Value:', studentData.year);
-        console.log('  editStudentSectionInput:', editStudentSectionInput, 'Value:', studentData.section_name);
-
+        console.log(studentData);
+        
         // Close student list modal first
         studentListModal.classList.remove('show'); 
 
