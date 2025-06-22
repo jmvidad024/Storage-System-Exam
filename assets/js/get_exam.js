@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         singleExamResultDiv.innerHTML = `
             <h2>${examData.title || 'N/A'} (ID: ${examData.exam_id})</h2>
             <p><strong>Instruction:</strong> ${examData.instruction || 'No instructions provided.'}</p>
-            <p><strong>Year:</strong> ${examData.year || 'N/A'} | <strong>Section:</strong> ${examData.section || 'N/A'} | <strong>Code:</strong> ${examData.code || 'N/A'}</p>
+            <p><strong>Year:</strong> ${examData.year || 'N/A'} | <strong>Section:</strong> ${examData.section || 'N/A'} | <strong>Code:</strong> ${examData.code || 'N/A' } | <strong>Course:</strong> ${examData.course || 'N/A' }</p>
             <hr>
             <h3>Questions:</h3>
             ${questionsHtml}
@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                                         <th>Year</th>
                                         <th>Section</th>
                                         <th>Code</th>
+                                        <th>Course</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -125,6 +126,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                                 <td data-label="Year">${exam.year}</td>
                                 <td data-label="Section">${exam.section}</td>
                                 <td data-label="Code">${exam.code}</td>
+                                <td data-label="Course">${exam.course}</td>
                                 <td class="actions" data-label="Actions">
                                     <a href="editExam.php?exam_id=${exam.exam_id}" class="btn btn-action btn-edit">Edit</a>
                                     <button class="btn btn-action btn-delete delete-exam-btn" data-exam-id="${exam.exam_id}">Delete</button>

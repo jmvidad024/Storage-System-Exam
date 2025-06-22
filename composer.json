@@ -1,0 +1,17 @@
+{
+    "name": "jeanettevidad/storage-system",
+    "autoload": {
+        "psr-4": {
+            "Jeanettevidad\\StorageSystem\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "jmvidad024",
+            "email": "johnmartin.vidad024@gmail.com"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^6.10"
+    }
+}

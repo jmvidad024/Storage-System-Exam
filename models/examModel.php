@@ -11,6 +11,20 @@ class ExamModel {
         $this->conn = $db->getConnection();
     }
 
+    public function splitCourseMajor($combined_course) {
+    if (strpos($combined_course, ':') !== false) {
+        $parts = explode(':', $combined_course, 2);
+        return [
+            'course' => trim($parts[0]),
+            'major' => trim($parts[1])
+        ];
+    }
+    return [
+        'course' => trim($combined_course),
+        'major' => null
+    ];
+}
+
     /**
      * Fetches a full exam by its ID, including all questions and their choices.
      * Includes the correct 'answer' for admin/faculty viewing.
@@ -25,7 +39,7 @@ class ExamModel {
         }
 
         // Fetch main exam details
-        $query = "SELECT exam_id, title, instruction, year, section, code FROM " . $this->exams_table . " WHERE exam_id = ? LIMIT 1";
+        $query = "SELECT exam_id, title, instruction, year, section, code, course FROM " . $this->exams_table . " WHERE exam_id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getExamById: Main exam query prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
@@ -43,6 +57,10 @@ class ExamModel {
 
         if (!$exam) {
             return false; // Exam not found
+        }
+
+        if (isset($exam['course'])) {
+            $exam['course_details'] = $this->splitCourseMajor($exam['course']);
         }
 
         // Fetch questions for the exam
@@ -193,21 +211,47 @@ class ExamModel {
      * @param string $code
      * @return bool True on success, false on failure.
      */
-    public function updateExamMain($exam_id, $title, $instruction, $year, $section, $code) {
-        $query = "UPDATE " . $this->exams_table . "
-                    SET title = ?, instruction = ?, year = ?, section = ?, code = ?
-                    WHERE exam_id = ?";
-        $stmt = $this->conn->prepare($query);
-        if (!$stmt) { error_log("ExamModel->updateExamMain: Prepare failed: " . $this->conn->error); throw new Exception("Prepare failed: " . $this->conn->error); }
-        $stmt->bind_param("ssissi", $title, $instruction, $year, $section, $code, $exam_id);
-        if ($stmt->execute()) {
-            $stmt->close();
-            return true;
-        }
-        error_log("ExamModel->updateExamMain: Execute failed: " . $stmt->error);
-        $stmt->close();
-        return false;
+    public function updateExamMain($exam_id, $title, $instruction, $year, $section, $code, $course, $major = null) {
+    // Combine course and major if major is provided
+    $full_course = $course;
+    if (!empty($major)) {
+        $full_course = $course . ' : ' . $major;
     }
+
+    $query = "UPDATE " . $this->exams_table . "
+              SET title = ?, 
+                  instruction = ?, 
+                  year = ?, 
+                  section = ?, 
+                  code = ?, 
+                  course = ?
+              WHERE exam_id = ?";
+    
+    $stmt = $this->conn->prepare($query);
+    if (!$stmt) { 
+        error_log("ExamModel->updateExamMain: Prepare failed: " . $this->conn->error); 
+        throw new Exception("Prepare failed: " . $this->conn->error); 
+    }
+    
+    $stmt->bind_param("ssisssi", 
+        $title, 
+        $instruction, 
+        $year, 
+        $section, 
+        $code, 
+        $full_course, 
+        $exam_id
+    );
+    
+    if ($stmt->execute()) {
+        $stmt->close();
+        return true;
+    }
+    
+    error_log("ExamModel->updateExamMain: Execute failed: " . $stmt->error);
+    $stmt->close();
+    return false;
+}
 
     /**
      * Creates a new question for an exam.
@@ -404,7 +448,7 @@ class ExamModel {
      * @return array An array of all exam records, or an empty array if none found.
      */
     public function getAllExams() {
-        $query = "SELECT exam_id, title, instruction, year, section, code FROM " . $this->exams_table . " ORDER BY title ASC";
+        $query = "SELECT exam_id, title, instruction, year, section, code, course FROM " . $this->exams_table . " ORDER BY title ASC";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getAllExams: Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
@@ -464,4 +508,8 @@ class ExamModel {
             return false; // Deletion failed for other reasons
         }
     }
+
+    
+
 }
+

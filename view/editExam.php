@@ -87,6 +87,28 @@ if (isset($_GET['status']) && isset($_GET['message'])) {
                                 <option value="C">C</option>
                             </select>
                         </div>
+                        <div class="form-group-inline">
+                            <label for="course">Course</label>
+                            <select name="course" id="course">
+                                <option value="">Select Course</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Education">Education</option>
+                                <option value="Engineering">Engineering</option>
+                            </select>
+
+                            <!-- Add this hidden field to store the combined course:major value -->
+                            <input type="hidden" id="course_major_db" name="course_major_db">
+
+                            <!-- Add the majors dropdown (initially hidden) -->
+                            <div class="form-group-inline" id="major-group" style="display: none;">
+                                <label for="major">Major</label>
+                                <select id="major" name="major">
+                                    <option value="">Select Major</option>
+                                    <!-- JavaScript will populate this -->
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     
                     <label for="code">Exam Code</label>

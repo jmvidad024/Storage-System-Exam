@@ -46,14 +46,9 @@ if (isset($_POST['logout'])) {
         </div>
         <div class="header-right">
             <span class="welcome-message">Welcome, <?php echo htmlspecialchars($userName); ?>! (Role: <?php echo htmlspecialchars($userRole); ?>)</span>
-            <div class="dropdown">
-                <button id="dropdown-button" class="dropdown-toggle">Options <span class="arrow-down">&#9660;</span></button>
-                <div class="dropdown-menu">
-                    <form method="post">
-                        <button type="submit" name="logout" class="logout-button">Logout</button>
-                    </form>
-                </div>
-            </div>
+            <form action="" method="post">
+                <button type="submit" name="logout" id="logout-button">Logout</button>
+            </form>
         </div>
     </header>
 
@@ -134,8 +129,24 @@ if (isset($_POST['logout'])) {
                 </div>
                 <div class="form-group">
                     <label for="editStudentCourse">Course</label>
-                    <input type="text" id="editStudentCourse" name="course" required>
+                    <select name="course" id="editStudentCourse">
+                        <option value="">Select Course</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Education">Education</option>
+                            <option value="Engineering">Engineering</option>
+                    </select>
                 </div>
+
+                <div class="form-group" id="editStudentMajorGroup" style="display: none;">
+                    <label for="editStudentMajor">Major</label>
+                    <select id="editStudentMajor" name="major">
+                        <option value="">Select Major</option>
+                    </select>
+                </div>
+
+                <!-- Final value sent -->
+                <input type="hidden" id="editStudentCourseMajor" name="course_combined">
                 <div class="form-group">
                     <label for="editStudentYear">Year</label>
                     <input type="number" id="editStudentYear" name="year" min="1" max="5" required>
@@ -161,6 +172,8 @@ if (isset($_POST['logout'])) {
             </div>
         </div>
     </div>
+
+    <input type="hidden" id="userRole" value="<?php echo htmlspecialchars($userRole); ?>">
 
     <!-- General dashboard JS for dropdown (if not already combined) -->
     <script src="../assets/js/dashboard.js"></script>

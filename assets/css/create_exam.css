@@ -19,7 +19,7 @@ body {
 }
 
 .page-header h1 {
-    margin: 0;
+    margin: 0; 
     font-size: 2rem;
     flex-grow: 1; /* This makes the h1 take up all available space */
     text-align: center; /* This centers the text WITHIN that available space */

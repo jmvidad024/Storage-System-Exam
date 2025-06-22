@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    // Dropdown logic (assuming it's in dashboard.js or integrated elsewhere, but keeping here for completeness)
+    // --- Dropdown logic ---
     const dropdownButton = document.getElementById('dropdown-button');
     const dropdownMenu = document.querySelector('.dropdown-menu');
 
@@ -17,11 +17,74 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     }
 
+    const userRoleElement = document.getElementById('userRole');
+    let currentUserRole = userRoleElement ? userRoleElement.value : 'guest';
+    console.log("Initial User Role from PHP:", currentUserRole); // For debugging
+
+    // --- References for the edit student modal and related elements ---
+    // Moved these declarations outside of the dropdown logic to ensure global access
+    const editStudentModal = document.getElementById('editStudentModal');
+    const closeEditStudentModalBtn = document.getElementById('closeEditStudentModalBtn');
+    const editStudentForm = document.getElementById('editStudentForm');
+    const editStudentIdInput = document.getElementById('editStudentId'); // PK 'id' from students table
+    const editUserIdInput = document.getElementById('editUserId'); // Hidden field for user_id
+    const editStudentUsernameInput = document.getElementById('editStudentUsername'); // Username cannot be edited
+    const editStudentNameInput = document.getElementById('editStudentName');
+    const editStudentEmailInput = document.getElementById('editStudentEmail');
+    const editStudentCourseInput = document.getElementById('editStudentCourse'); // This was the problematic one
+    const editStudentYearInput = document.getElementById('editStudentYear');
+    const editStudentSectionInput = document.getElementById('editStudentSection');
+    const editStudentModalMessage = document.getElementById('editStudentModalMessage');
+
+    const editStudentMajorGroup = document.getElementById('editStudentMajorGroup');
+    const editStudentMajorInput = document.getElementById('editStudentMajor');
+    const editStudentCourseMajorHidden = document.getElementById('editStudentCourseMajor');
+
+    const majorsByCourse = {
+        'Education': ['Science', 'Math', 'English', 'History'],
+        'Engineering': ['Electrical', 'Mechanical', 'Civil'],
+        // Add more if needed
+    };
+
+    // --- Event listeners for Course and Major selection in Edit Student Modal ---
+    editStudentCourseInput.addEventListener('change', () => {
+        const selectedCourse = editStudentCourseInput.value;
+        const majors = majorsByCourse[selectedCourse];
+
+        if (majors) {
+            editStudentMajorGroup.style.display = 'block';
+            editStudentMajorInput.innerHTML = '<option value="">Select Major</option>';
+            majors.forEach(major => {
+                const option = document.createElement('option');
+                option.value = major;
+                option.textContent = major;
+                editStudentMajorInput.appendChild(option);
+            });
+            // If there's a preselected major stored, attempt to set it
+            if (editStudentMajorInput.dataset.preselectedMajor) {
+                editStudentMajorInput.value = editStudentMajorInput.dataset.preselectedMajor;
+                delete editStudentMajorInput.dataset.preselectedMajor; // Clear it after use
+            }
+            editStudentMajorInput.dispatchEvent(new Event('change')); // Trigger major change for hidden field
+        } else {
+            editStudentMajorGroup.style.display = 'none';
+            editStudentMajorInput.innerHTML = '';
+            editStudentCourseMajorHidden.value = selectedCourse; // Only course if no major
+        }
+    });
+
+    editStudentMajorInput.addEventListener('change', () => {
+        const course = editStudentCourseInput.value;
+        const major = editStudentMajorInput.value;
+        editStudentCourseMajorHidden.value = major ? `${course} : ${major}` : course;
+    });
+
+    // --- Main Course List Display ---
     const courseListContainer = document.getElementById('course_list_container');
     const loadingIndicator = courseListContainer.querySelector('.loading-indicator');
     const errorMessageDiv = courseListContainer.querySelector('.error-message');
 
-    // References for the student list modal
+    // --- Student List Modal Elements ---
     const studentListModal = document.getElementById('studentListModal');
     const closeStudentModalBtn = document.getElementById('closeStudentModalBtn');
     const studentListTableBody = document.getElementById('studentListTableBody');
@@ -29,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const studentModalError = document.getElementById('studentModalError');
     const studentModalTitle = document.getElementById('studentModalTitle');
 
-    // References for the delete student confirmation modal
+    // --- Delete Student Confirmation Modal Elements ---
     const deleteStudentConfirmationModal = document.getElementById('deleteStudentConfirmationModal');
     const confirmDeleteStudentBtn = document.getElementById('confirmDeleteStudentBtn');
     const cancelDeleteStudentBtn = document.getElementById('cancelDeleteStudentBtn');
@@ -37,22 +100,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     let studentIdToDelete = null; // Store ID of student (PK 'id' from students table) to be deleted
     let currentSectionData = { course: null, year: null, section: null }; // To refresh current section after delete
 
-    // References for the edit student modal
-    const editStudentModal = document.getElementById('editStudentModal');
-    const closeEditStudentModalBtn = document.getElementById('closeEditStudentModalBtn');
-    const editStudentForm = document.getElementById('editStudentForm');
-    const editStudentIdInput = document.getElementById('editStudentId'); // This will store the PK 'id' of students table
-    const editUserIdInput = document.getElementById('editUserId'); // Hidden field for user_id
-    const editStudentUsernameInput = document.getElementById('editStudentUsername'); // Username cannot be edited
-    const editStudentNameInput = document.getElementById('editStudentName');
-    const editStudentEmailInput = document.getElementById('editStudentEmail');
-    const editStudentCourseInput = document.getElementById('editStudentCourse');
-    const editStudentYearInput = document.getElementById('editStudentYear');
-    const editStudentSectionInput = document.getElementById('editStudentSection');
-    const editStudentModalMessage = document.getElementById('editStudentModalMessage');
 
-
-    // Helper function to display messages (reusing from getExam.js principles)
+    // Helper function to display messages
     function displayActionMessage(targetElement, type, message, duration = 5000) {
         targetElement.classList.remove('hidden', 'success', 'error', 'loading');
         targetElement.textContent = message;
@@ -75,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         loadingIndicator.style.display = 'block';
         errorMessageDiv.style.display = 'none';
         errorMessageDiv.textContent = '';
-        courseListContainer.querySelector('.course-list')?.remove(); 
+        courseListContainer.querySelector('.course-list')?.remove();
 
         try {
             const response = await fetch('../api/courses.php');
@@ -152,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                             sectionItem.dataset.yearLevel = year.year_level;
                             sectionItem.dataset.sectionName = section.section_name;
                             sectionItem.innerHTML = `Section ${section.section_name} <span class="student-count">${section.student_count} students</span>`;
-                            
+
                             sectionItem.style.cursor = 'pointer';
                             sectionItem.classList.add('clickable-section');
                             sectionItem.addEventListener('click', () => {
@@ -168,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                                     sectionItem.dataset.sectionName
                                 );
                             });
-                            
+
                             sectionList.appendChild(sectionItem);
                         });
                         sectionsContainer.appendChild(sectionList);
@@ -192,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         studentModalLoading.style.display = 'block'; // Show loading
         studentModalError.style.display = 'none'; // Hide error
         studentListTableBody.innerHTML = ''; // Clear previous student list
-        
+
         studentModalTitle.textContent = `Students in ${courseName}, Year ${yearLevel}, Section ${sectionName}`;
 
         try {
@@ -201,33 +250,46 @@ document.addEventListener('DOMContentLoaded', async function() {
             studentModalLoading.style.display = 'none'; // Hide loading
 
             if (response.ok && data.status === 'success' && data.students) {
+                const isFaculty = currentUserRole === 'faculty';
+
+                // Adjust table headers based on role
+                const studentListTableHead = studentListModal.querySelector('.student-table thead tr');
+                studentListTableHead.innerHTML = `
+                    <th>Student ID</th>
+                    ${isFaculty ? '' : '<th>Username</th>'}
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    ${isFaculty ? '' : '<th>Actions</th>'}
+                `;
                 if (data.students.length > 0) {
                     data.students.forEach(student => {
-                        console.log(student.year_level);
                         const row = document.createElement('tr');
-                        // Use student.id (PK from students table) for data-student-id
                         row.innerHTML = `
                             <td data-label="Student ID">${student.student_id || 'N/A'}</td>
-                            <td data-label="Username">${student.username || 'N/A'}</td>
+                            ${isFaculty ? '' : `<td data-label="Username">${student.username || 'N/A'}</td>`}
                             <td data-label="Full Name">${student.name || 'N/A'}</td>
                             <td data-label="Email">${student.email || 'N/A'}</td>
+                            ${isFaculty ? '' : `
                             <td data-label="Actions" class="actions">
                                 <button class="btn btn-action btn-edit edit-student-btn"
                                     data-student-id="${student.id}"
-                                    data-user-id="${student.user_id}"
-                                    data-username="${student.username}"
-                                    data-name="${student.name}"
-                                    data-email="${student.email}"
-                                    data-course="${student.course_name}"   data-year="${student.year_level}"      data-section="${student.section_name}">
+                                    data-user-id="${student.user_id || ''}"
+                                    data-username="${student.username || ''}"
+                                    data-name="${student.name || ''}"
+                                    data-email="${student.email || ''}"
+                                    data-course="${student.course_name || ''}${student.major ? ' : ' + student.major : ''}"
+                                    data-year="${student.year_level || ''}"
+                                    data-section="${student.section_name || ''}">
                                     Edit</button>
-                                    <button class="btn btn-action btn-delete delete-student-btn"
+                                <button class="btn btn-action btn-delete delete-student-btn"
                                     data-student-id="${student.id}"
-                                    data-username="${student.username}">Delete</button>
+                                    data-username="${student.username || ''}">Delete</button>
                             </td>
+                            `}
                         `;
                         studentListTableBody.appendChild(row);
                     });
-                    
+
                     // Attach event listeners to newly created buttons
                     studentListTableBody.querySelectorAll('.edit-student-btn').forEach(button => {
                         button.addEventListener('click', function() {
@@ -258,10 +320,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // NEW FUNCTION: Opens the edit student modal and populates form
     function openEditStudentModal(studentData) {
-        console.log(studentData);
-        
+        if (currentUserRole === 'faculty') {
+            console.warn("Faculty members cannot edit student data.");
+            return;
+        }
+
         // Close student list modal first
-        studentListModal.classList.remove('show'); 
+        studentListModal.classList.remove('show');
 
         // Check if elements are found before attempting to set value
         if (editStudentIdInput) editStudentIdInput.value = studentData.studentId;
@@ -269,9 +334,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (editStudentUsernameInput) editStudentUsernameInput.value = studentData.username;
         if (editStudentNameInput) editStudentNameInput.value = studentData.name;
         if (editStudentEmailInput) editStudentEmailInput.value = studentData.email;
-        if (editStudentCourseInput) editStudentCourseInput.value = studentData.course;
         if (editStudentYearInput) editStudentYearInput.value = studentData.year;
         if (editStudentSectionInput) editStudentSectionInput.value = studentData.section;
+
+        if (editStudentCourseInput && studentData.course) {
+            const [course, major] = studentData.course.split(' : ').map(s => s.trim()); // Split by ' : '
+            editStudentCourseInput.value = course;
+
+            // Store major in a dataset attribute before dispatching change
+            if (major) {
+                editStudentMajorInput.dataset.preselectedMajor = major;
+            }
+            editStudentCourseInput.dispatchEvent(new Event('change')); // Trigger major dropdown population
+        }
 
         editStudentModalMessage.style.display = 'none'; // Hide any previous messages
         editStudentModal.classList.add('show');
@@ -282,6 +357,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         e.preventDefault();
 
         const formData = new FormData(editStudentForm);
+        formData.set('course', editStudentCourseMajorHidden.value); // Final course value
         const studentData = Object.fromEntries(formData.entries());
 
         // Basic validation (can be expanded)
@@ -302,10 +378,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
             const result = await response.json();
 
+
             if (response.ok && result.status === 'success') {
                 displayActionMessage(editStudentModalMessage, 'success', result.message || 'Student updated successfully!', 3000);
                 editStudentModal.classList.remove('show'); // Hide modal
-                
+
                 // Refresh the list for the current section
                 showStudentsForSection(currentSectionData.course, currentSectionData.year, currentSectionData.section);
                 // Also refresh the main course list to update student counts in case of section/course change
@@ -351,7 +428,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (response.ok && result.status === 'success') {
                 displayActionMessage(errorMessageDiv, 'success', result.message || 'Student deleted successfully!', 5000); // Use main page message area
                 studentIdToDelete = null; // Clear stored ID
-                
+
                 // Re-open and refresh the student list for the current section
                 showStudentsForSection(currentSectionData.course, currentSectionData.year, currentSectionData.section);
                 // Also refresh the main course list to update student counts
@@ -368,6 +445,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     // NEW: Close edit student modal event listener
     closeEditStudentModalBtn.addEventListener('click', () => {
         editStudentModal.classList.remove('show');
+        // Re-show the student list modal if it was open before edit
+        showStudentsForSection(currentSectionData.course, currentSectionData.year, currentSectionData.section);
     });
 
     // NEW: Cancel delete student modal event listener
@@ -394,6 +473,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         if (event.target === editStudentModal) {
             editStudentModal.classList.remove('show');
+            // Re-show the student list modal if it was open before edit
+            showStudentsForSection(currentSectionData.course, currentSectionData.year, currentSectionData.section);
         }
     });
 

@@ -1,12 +1,16 @@
 <?php
+
+require_once 'student.php';
+
 class User {
     private $table_name = "users"; // Your students table name
-
-    private $id;
+    private $conn;
+    public $id;
     private $username;
     private $name; 
-    private $email;
-    private $role;
+    public $email;
+    public $role;
+    private $password_hash;
     private $isAuthenticated = false;
     private $db;
 
@@ -46,18 +50,11 @@ class User {
         return false;
     }
 
-    public function getStudentDetails($user_id) {
-        $conn = $this->db->getConnection();
-        $query = "SELECT student_id, course, year, section FROM students WHERE user_id = ? LIMIT 1";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $studentData = $result->fetch_assoc();
-        $stmt->close();
-        return $studentData;
-    }
+    // In your User class, update or add this method:
+public function getStudentDetails($user_id) {
+    $student = new Student($this->db);
+    return $student->getByUserId($user_id);
+}
 
     public function logout() {
         $this->id = null;
@@ -144,6 +141,20 @@ class User {
         return false;
     }
 
+    public function getFacultyCourseMajor($user_id) {
+        $query = "SELECT course FROM faculty_details WHERE user_id = ? LIMIT 0,1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['course']; // Returns "Course : Major" or "Course"
+        }
+        return null;
+    }
+
     public function findByUsername($username) {
         $conn = $this->db->getConnection(); // Get the mysqli connection object
         $query = "SELECT id, username, name, email, role, password_hash FROM users WHERE username = ? LIMIT 1";
@@ -163,23 +174,146 @@ class User {
         return false;
     }
 
-    public function findByEmail($email) {
-        $conn = $this->db->getConnection(); // Get the mysqli connection object
-        $query = "SELECT id, username, name, email, role, password_hash FROM users WHERE email = ? LIMIT 1";
-        
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("s", $email);
+    public function findByEmail() {
+        $query = "SELECT id, username, name, email, role, password_hash
+                  FROM " . $this->table_name . "
+                  WHERE email = ?
+                  LIMIT 0,1";
+
+        // Line 168: This is where the error occurred
+        $stmt = $this->conn->prepare($query);
+
+        if (!$stmt) {
+            // Add error logging for prepare failures
+            error_log("MySQLi Prepare Error: " . $this->conn->error);
+            return false;
+        }
+
+        // Bind the parameter (s for string)
+        $this->email = htmlspecialchars(strip_tags($this->email)); // Sanitize email
+        $stmt->bind_param('s', $this->email);
+
+        $stmt->execute();
+        $result = $stmt->get_result(); // Get the result set
+
+        $row = $result->fetch_assoc();
+
+        if ($row) {
+            $this->id = $row['id'];
+            $this->username = $row['username'];
+            $this->name = $row['name'];
+            $this->email = $row['email'];
+            $this->role = $row['role'];
+            $this->password_hash = $row['password_hash'];
+            return $row;
+        }
+        return false;
+    }
+
+
+    // New method to update a user's password
+    public function updatePassword($newHashedPassword) {
+        $query = "UPDATE " . $this->table_name . "
+                  SET password_hash = ?          -- Changed to positional placeholder
+                  WHERE id = ?";            
+
+        $stmt = $this->conn->prepare($query);
+
+        if (!$stmt) {
+            // It's good practice to log prepare errors
+            error_log("MySQLi Prepare Error (updatePassword): " . $this->conn->error);
+            return false;
+        }
+
+        // Sanitize password (already hashed, so strip_tags is fine)
+        // Note: For ID, ensure it's an integer if it's an INT in DB.
+        // For password, it's a string.
+        $newHashedPassword_sanitized = htmlspecialchars(strip_tags($newHashedPassword));
+        $id_sanitized = htmlspecialchars(strip_tags($this->id)); // Ensure this is safe if ID is coming from user input.
+                                                              // For internal use like this, if $this->id is set from DB, it's generally safe.
+
+        // Use bind_param for mysqli: 's' for string (password), 'i' for integer (id)
+        $stmt->bind_param('si', $newHashedPassword_sanitized, $id_sanitized);
+
+        if ($stmt->execute()) {
+            $stmt->close(); // Close the statement after execution
+            return true;
+        } else {
+            // Log execution errors
+            error_log("MySQLi Execute Error (updatePassword): " . $stmt->error);
+            $stmt->close(); // Close the statement even on error
+            return false;
+        }
+    }
+
+    public function createFacultyDetails($userId, $course = null) {
+        $query = "INSERT INTO faculty_details (user_id, course)
+                  VALUES (?, ?)";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("Faculty Details Prepare Error: " . $this->conn->error);
+            return false;
+        }
+
+        // Sanitize the course name if it's coming from user input
+        $course_sanitized = htmlspecialchars(strip_tags($course));
+
+        // 'is' => i for user_id (integer), s for course (string)
+        $stmt->bind_param('is', $userId, $course_sanitized);
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        } else {
+            error_log("Faculty Details Execute Error: " . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+    }
+
+    // Method to get full user profile including faculty-specific details if applicable
+    public function getFullUserProfile($userId) {
+        $query = "SELECT u.id, u.username, u.name, u.email, u.role,
+                         fd.course -- Only fetch 'course' from faculty_details
+                  FROM " . $this->table_name . " u
+                  LEFT JOIN faculty_details fd ON u.id = fd.user_id
+                  WHERE u.id = ? LIMIT 0,1";
+
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("Get Full User Profile Prepare Error: " . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('i', $userId);
         $stmt->execute();
         $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            $userData = $result->fetch_assoc();
-            $stmt->close();
-            return $userData;
-        }
-        
+        $row = $result->fetch_assoc();
         $stmt->close();
-        return false;
+
+        return $row;
+    }
+
+    // You might also want a method to update faculty details
+    public function updateFacultyCourse($userId, $newCourse) {
+        $query = "UPDATE faculty_details
+                  SET course = ?, updated_at = CURRENT_TIMESTAMP
+                  WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("Update Faculty Course Prepare Error: " . $this->conn->error);
+            return false;
+        }
+        $newCourse_sanitized = htmlspecialchars(strip_tags($newCourse));
+        $stmt->bind_param('si', $newCourse_sanitized, $userId);
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        } else {
+            error_log("Update Faculty Course Execute Error: " . $stmt->error);
+            $stmt->close();
+            return false;
+        }
     }
 
     public function updateNameAndEmail($id, $name, $email) {

@@ -95,7 +95,7 @@ header h1 {
     margin: 0; /* Remove default form margin */
 }
 
-.logout-button {
+#logout-button {
     color: white;
     padding: 12px 16px;
     text-decoration: none;
@@ -109,8 +109,9 @@ header h1 {
     transition: background-color 0.3s ease;
 }
 
-.logout-button:hover {
+#logout-button:hover {
     background-color: #2c3e50; /* Darker on hover */
+    opacity: .5;
 }
 
 /* Sidebar Styling */

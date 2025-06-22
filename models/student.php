@@ -61,6 +61,37 @@ class Student {
         return false;
     }
 
+    // Add this method to your Student class
+/**
+ * Gets student details by user_id
+ * 
+ * @param int $user_id The user ID
+ * @return array|false Student data if found, false otherwise
+ */
+public function getByUserId($user_id) {
+    $query = "SELECT id, user_id, student_id, course, year, section, created_at
+              FROM " . $this->table_name . "
+              WHERE user_id = ? LIMIT 1";
+
+    $stmt = $this->conn->prepare($query);
+    if (!$stmt) {
+        error_log("Student Model getByUserId - Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
+        return false;
+    }
+
+    $stmt->bind_param("i", $user_id);
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $student_data = $result->fetch_assoc();
+        $stmt->close();
+        return $student_data;
+    }
+
+    error_log("Student Model getByUserId - Execute failed: (" . $stmt->errno . ") " . $stmt->error);
+    $stmt->close();
+    return false;
+}
+
     /**
      * Finds a student by their unique student_id and returns their details.
      *

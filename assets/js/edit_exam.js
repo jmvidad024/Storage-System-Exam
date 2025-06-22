@@ -9,6 +9,73 @@ document.addEventListener('DOMContentLoaded', function() {
     const questionsContainer = document.getElementById('questions_container');
     const addQuestionBtn = document.getElementById('add_question_btn');
     const saveExamBtn = document.getElementById('save_exam_btn');
+    const courseInput = document.getElementById('course');
+
+
+    const courseSelect = document.getElementById('course');
+    const majorGroup = document.getElementById('major-group');
+    const majorSelect = document.getElementById('major');
+    const courseMajorDb = document.getElementById('course_major_db');
+
+    
+
+    // Define which courses have majors
+    const majorsByCourse = {
+        'Education': ['Science', 'Math', 'English', 'History'],
+        // Add other courses with majors if needed
+    };
+
+    // Handle course selection changes
+    courseSelect.addEventListener('change', function() {
+        const selectedCourse = this.value;
+        
+        // Hide major group if no course or course doesn't have majors
+        if (!selectedCourse || !majorsByCourse[selectedCourse]) {
+            majorGroup.style.display = 'none';
+            majorSelect.innerHTML = '<option value="">Select Major</option>'; // Clear major options
+            courseMajorDb.value = selectedCourse; // Store just the course
+            return;
+        }
+        
+        // Show major group and populate options
+        majorGroup.style.display = 'block';
+        majorSelect.innerHTML = '<option value="">Select Major</option>';
+        
+        majorsByCourse[selectedCourse].forEach(function(major) {
+            const option = document.createElement('option');
+            option.value = major;
+            option.textContent = major;
+            majorSelect.appendChild(option);
+        });
+        if (majorSelect.dataset.preselectedMajor) {
+            majorSelect.value = majorSelect.dataset.preselectedMajor;
+            // Clear preselected major after attempting to set it
+            delete majorSelect.dataset.preselectedMajor;
+        }
+        // Manually trigger change to ensure hidden field is updated if major was preselected
+        majorSelect.dispatchEvent(new Event('change'));
+    });
+
+    
+
+    // Update hidden field when major is selected
+    majorSelect.addEventListener('change', function() {
+        const selectedCourse = courseSelect.value;
+        const selectedMajor = this.value;
+        
+        if (selectedMajor) {
+            courseMajorDb.value = `${selectedCourse} : ${selectedMajor}`;
+        } else {
+            courseMajorDb.value = selectedCourse;
+        }
+    });
+
+    // Trigger initial setup
+    courseSelect.dispatchEvent(new Event('change'));
+
+
+
+
     
     // Elements for delete attempts modal (modal is now triggered by successful save)
     const deleteAttemptsConfirmationModal = document.getElementById('deleteAttemptsConfirmationModal');
@@ -125,6 +192,29 @@ document.addEventListener('DOMContentLoaded', function() {
         yearSelect.value = initialExamData.year;
         sectionSelect.value = initialExamData.section;
         codeInput.value = initialExamData.code;
+        
+
+        const fullCourseMajor = initialExamData.course || '';
+const [coursePart, majorPart] = fullCourseMajor.split(':').map(part => part.trim());
+
+courseInput.value = coursePart;
+courseMajorDb.value = fullCourseMajor;
+
+if (majorsByCourse[coursePart]) {
+    // Preload the major dropdown
+    majorGroup.style.display = 'block';
+    majorSelect.innerHTML = '<option value="">Select Major</option>';
+    majorsByCourse[coursePart].forEach(function(major) {
+        const option = document.createElement('option');
+        option.value = major;
+        option.textContent = major;
+        majorSelect.appendChild(option);
+    });
+
+    if (majorPart) {
+        majorSelect.value = majorPart;
+    }
+}
 
         if (initialExamData.questions && initialExamData.questions.length > 0) {
             initialExamData.questions.forEach(q => addQuestionBlock(q));
@@ -162,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
             year: yearSelect.value,
             section: sectionSelect.value,
             code: codeInput.value.trim(),
+            course: courseMajorDb.value.trim(),
             questions: []
         };
 

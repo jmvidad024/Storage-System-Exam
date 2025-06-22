@@ -20,12 +20,14 @@ $userId = $user->getId();
 // Variables for student-specific data
 $student_year = null;
 $student_section = null;
+$student_course = null;
 
 if ($userRole === 'student') {
     $studentDetails = $user->getStudentDetails($userId);
     if ($studentDetails) {
         $student_year = $studentDetails['year'];
         $student_section = $studentDetails['section'];
+        $student_course = $studentDetails['course'];
     }
 }
 
@@ -57,14 +59,9 @@ if (isset($_POST['logout'])) {
         </div>
         <div class="header-right">
             <span class="welcome-message">Welcome, <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
-            <div class="dropdown">
-                <button id="dropdown-button" class="dropdown-toggle">Options <span class="arrow-down">&#9660;</span></button>
-                <div class="dropdown-menu">
-                    <form method="post">
-                        <button type="submit" name="logout" class="logout-button">Logout</button>
-                    </form>
-                </div>
-            </div>
+            <form action="" method="post">
+                <button type="submit" name="logout" id="logout-button">Logout</button>
+            </form>
         </div>
     </header>
 
@@ -101,7 +98,8 @@ if (isset($_POST['logout'])) {
             <!-- Student-specific panel to display exams -->
             <div class="student-panel">
                 <h3>Available Exams for You</h3>
-                <p>Here are the exams currently available for Year <?php echo htmlspecialchars($student_year); ?> Section <?php echo htmlspecialchars($student_section); ?>.</p>
+                <p>Here are the exams currently available for:
+                     <br>Year <?php echo htmlspecialchars($student_year); ?> Section <?php echo htmlspecialchars($student_section); ?>-<?php echo htmlspecialchars($student_course); ?>.</p>
                 
                 <!-- Data attributes to pass student info to JS -->
                 <div id="exam_list_container" 

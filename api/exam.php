@@ -85,7 +85,8 @@ switch ($method) {
                 !isset($data['instruction']) ||
                 !isset($data['year']) ||
                 !isset($data['section']) ||
-                !isset($data['code'])
+                !isset($data['code']) ||
+                !isset($data['course'])
             ) {
                 http_response_code(400); // Bad request for missing fields
                 echo json_encode(["status" => "error", "message" => "Missing required fields for new exam: title, instruction, year, section, or code"]);
@@ -96,12 +97,12 @@ switch ($method) {
             $conn->begin_transaction();
 
             // Insert exam
-            $stmt = $conn->prepare("INSERT INTO exams (title, instruction, year, section, code) VALUES (?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO exams (title, instruction, year, section, code, course) VALUES (?, ?, ?, ?, ?, ?)");
             if (!$stmt) {
                 error_log("Prepare statement failed for exam: " . $conn->error);
                 throw new Exception("Prepare statement failed for exam: " . $conn->error);
             }
-            $stmt->bind_param("sssss", $data['title'], $data['instruction'], $data['year'], $data['section'], $data['code']);
+            $stmt->bind_param("ssssss", $data['title'], $data['instruction'], $data['year'], $data['section'], $data['code'], $data['course']);
             if (!$stmt->execute()) {
                 error_log("Execute failed for exam: " . $stmt->error);
                 throw new Exception("Execute failed for exam: " . $stmt->error);
@@ -187,7 +188,8 @@ switch ($method) {
                 $data['instruction'] ?? '',
                 $data['year'] ?? '',
                 $data['section'] ?? '',
-                $data['code'] ?? ''
+                $data['code'] ?? '',
+                $data['course']
             );
             if (!$update_main) {
                 throw new Exception("Failed to update main exam details.");

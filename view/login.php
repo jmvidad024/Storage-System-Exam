@@ -72,6 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <button type="submit">Login</button>
         </form>
+
+        <p class="mt-2">
+        <a href="forgot_password.php">Forgot Password?</a> </p>
     </div>
     
     <script src="../assets/js/login.js"></script>

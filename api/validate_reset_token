@@ -1,0 +1,60 @@
+<?php
+session_start();
+ini_set('display_errors', 0); // Turn off error output to browser
+ini_set('display_startup_errors', 0);
+error_reporting(E_ALL);
+
+require_once '../env_loader.php';
+require_once '../assets/config/database.php';
+
+header('Content-Type: application/json');
+
+$database = new Database();
+$db = $database->getConnection();
+
+$token = $_GET['token'] ?? '';
+
+if (empty($token)) {
+    echo json_encode(['status' => 'error', 'message' => 'Token is missing.']);
+    exit();
+}
+
+try {
+    $db = $database->getConnection(); // Assume $db is mysqli object
+
+// ...
+
+$stmt = $db->prepare("SELECT user_id, expires_at FROM password_reset_tokens WHERE token = ?");
+if (!$stmt) {
+    error_log("Prepare statement failed: " . $db->error);
+    echo json_encode(['status' => 'error', 'message' => 'An internal server error occurred.']);
+    exit();
+}
+$stmt->bind_param('s', $token); // 's' for string
+$stmt->execute();
+$result = $stmt->get_result();
+$tokenData = $result->fetch_assoc();
+$stmt->close();
+
+    if (!$tokenData) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid reset token.']);
+        exit();
+    }
+
+    $expiresAt = new DateTime($tokenData['expires_at']);
+    $currentTime = new DateTime();
+
+    if ($currentTime > $expiresAt) {
+        echo json_encode(['status' => 'error', 'message' => 'Expired reset token.']);
+        exit();
+    }
+
+    echo json_encode(['status' => 'valid', 'message' => 'Token is valid.']);
+
+} catch (PDOException $e) {
+    error_log("Database error during token validation: " . $e->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'An internal server error occurred.']);
+}
+
+$db = null; // Close DB connection
+?>

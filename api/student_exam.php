@@ -24,9 +24,9 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === "GET") {
     try {
         // Get student's user ID from session
-        $user_id = $user->getId();
+         $user_id = $user->getId();
 
-        // Get student's year and section
+        // Get student's details including course
         $studentDetails = $user->getStudentDetails($user_id);
         if (!$studentDetails) {
             http_response_code(404);
@@ -36,14 +36,20 @@ if ($method === "GET") {
 
         $student_year = $studentDetails['year'];
         $student_section = $studentDetails['section'];
+        $student_course = $studentDetails['course']; // Get the student's course
 
-        // Get all exams matching the student's year and section
+        // Get all exams matching the student's year, section, AND course
         $conn = $database->getConnection();
-        $stmt = $conn->prepare("SELECT exam_id, title, instruction, year, section, code FROM exams WHERE year = ? AND section = ?");
+        
+        // Option 1: Exact match (if exams.course contains "Course : Major")
+        $stmt = $conn->prepare("SELECT exam_id, title, instruction, year, section, code, course 
+                               FROM exams 
+                               WHERE year = ? AND section = ? AND course = ?");
+                               
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
-        $stmt->bind_param("is", $student_year, $student_section);
+        $stmt->bind_param("iss", $student_year, $student_section, $student_course);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -81,9 +87,10 @@ if ($method === "GET") {
             "status" => "success",
             "message" => "Exams retrieved successfully.",
             "exams" => $exams,
-            "student_details" => [ // Optionally send student details for frontend display
+            "student_details" => [
                 'year' => $student_year,
-                'section' => $student_section
+                'section' => $student_section,
+                'course' => $student_course // Include course in response
             ]
         ]);
 
