@@ -109,6 +109,33 @@ header h1 {
     transition: background-color 0.3s ease;
 }
 
+
+/* assets/css/dashboard.css */
+
+/* ... existing CSS ... */
+
+.dashboard-metric {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.dashboard-metric h4 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.dashboard-metric .metric-value {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #007bff; /* A nice blue, adjust as needed */
+    margin-bottom: 0;
+}
 #logout-button:hover {
     background-color: #2c3e50; /* Darker on hover */
     opacity: .5;

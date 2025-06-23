@@ -30,7 +30,10 @@ if ($userRole === 'student') {
         $student_course = $studentDetails['course'];
     }
 }
-
+$totalStudents = 0;
+if ($userRole === 'admin') {
+    $totalStudents = $user->countStudents();
+}
 
 
 if (isset($_POST['logout'])) {
@@ -85,9 +88,13 @@ if (isset($_POST['logout'])) {
         <p>This is the main content area of your dashboard. You can add various widgets, summaries, or quick actions here.</p>
         
         <?php if ($userRole === 'admin'): ?>
-            <div class="admin-panel">
-                <h3>Admin Tools</h3>
-                <p>Welcome, Administrator! You have full access to all system features.</p>
+        <div class="admin-panel">
+            <h3>Admin Tools</h3>
+            <p>Welcome, Administrator! You have full access to all system features.</p>
+            <div class="dashboard-metric">
+                <h4>Total Registered Students:</h4>
+                <p class="metric-value"><?php echo htmlspecialchars($totalStudents); ?></p>
+            </div>
             </div>
         <?php elseif ($userRole === 'faculty'): ?>
             <div class="faculty-panel">

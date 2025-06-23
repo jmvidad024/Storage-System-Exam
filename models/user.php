@@ -50,6 +50,23 @@ class User {
         return false;
     }
 
+ public function countStudents() {
+        $query = "SELECT COUNT(*) as student_count FROM " . $this->table_name . " WHERE role = 'student'";
+        
+        // Using object-oriented MySQLi
+        $result = $this->conn->query($query); 
+        
+        if ($result) {
+            $row = $result->fetch_assoc(); // Use fetch_assoc() for associative array
+            $result->free(); // Free the result set
+            return $row['student_count'];
+        } else {
+            // Handle error, e.g., log it or throw an exception
+            error_log("Error counting students: " . $this->conn->error);
+            return 0; // Return 0 or handle error appropriately
+        }
+    }
+
     // In your User class, update or add this method:
 public function getStudentDetails($user_id) {
     $student = new Student($this->db);
