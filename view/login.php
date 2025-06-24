@@ -1,32 +1,45 @@
 <?php
+session_start();
 ini_set('display_errors', 0); // Turn off error output to browser
 ini_set('display_startup_errors', 0);
-error_reporting(E_ALL);       // Still log everything
-
+error_reporting(E_ALL); // Still log everything
 
 require_once '../env_loader.php';
 require_once '../assets/config/database.php';
-require_once '../models/User.php';
+require_once '../models/user.php';
 
-session_start();
 $database = new Database();
 $user = new User($database);
 
-// Redirect if already logged in
+$message = '';
+
+// If a user is already logged in, redirect them to the dashboard
 if ($user->isLoggedIn()) {
     header('Location: dashboard.php');
-    exit;
+    exit();
 }
 
+// Handle login attempt
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($user->login($_POST['username'], $_POST['password'])) {
-        // Redirect to intended page or dashboard
-        $redirect = $_SESSION['redirect_url'] ?? 'dashboard.php';
-        unset($_SESSION['redirect_url']);
-        header("Location: $redirect");
-        exit;
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    if (empty($username) || empty($password)) {
+        $message = "Please enter both username and password.";
     } else {
-        $error = "Invalid username or password";
+        $loginResult = $user->login($username, $password);
+
+        if ($loginResult === true) {
+            // Login successful, redirect to dashboard
+            header('Location: dashboard.php');
+            exit();
+        } elseif ($loginResult === 'not_verified') {
+            // Account not verified
+            $message = "Your account is not yet verified. Please check your email for a verification link.";
+        } else {
+            // Login failed (incorrect credentials)
+            $message = "Invalid username or password.";
+        }
     }
 }
 ?>
@@ -36,47 +49,113 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Storage System</title>
+    <title>Login</title>
+    <link rel="stylesheet" href="../assets/css/login.css"> <!-- General styles -->
     <style>
-        .error-message {
-            color: var(--error-color);
-            font-size: 14px;
-            margin-top: 5px;
+        /* Basic login form styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            display: <?php echo isset($error) ? 'block' : 'none'; ?>;
+        }
+        .login-container h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+        .login-container .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: calc(100% - 20px); /* Adjust for padding */
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .login-container button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+        .message-area {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            background-color: #f8d7da; /* Error background */
+            color: #721c24; /* Error text color */
+            border: 1px solid #f5c6cb;
+            display: <?php echo !empty($message) ? 'block' : 'none'; ?>; /* Show if message exists */
+        }
+        .register-link {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .register-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
         }
     </style>
-    <link rel="stylesheet" href="../assets/css/login.css">
 </head>
 <body>
     <div class="login-container">
-        <div class="login-header">
-            <h1>Welcome Back</h1>
-            <p>Sign in to access your storage system</p>
-        </div>
-        
-        <form class="login-form" action="" method="POST" id="login_form">
+        <h1>Login</h1>
+        <form action="" method="POST">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" name="username" id="username" placeholder="Enter your username" required>
+                <input type="text" id="username" name="username" required>
             </div>
-            
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                <input type="password" id="password" name="password" required>
             </div>
-            
-            <div class="error-message">
-                <?php echo isset($error) ? $error : ''; ?>
-            </div>
-            
             <button type="submit">Login</button>
         </form>
-
-        <p class="mt-2">
-        <a href="forgot_password.php">Forgot Password?</a> </p>
+        <div id="login_message_area" class="message-area">
+            <?php echo $message; ?>
+        </div>
+        <p class="register-link">Don't have an account? <a href="register.php">Register here</a></p>
     </div>
-    
-    <script src="../assets/js/login.js"></script>
 </body>
 </html>

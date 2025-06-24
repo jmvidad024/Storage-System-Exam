@@ -1,4 +1,5 @@
 <?php
+// models/student.php
 
 class Student {
     private $conn;
@@ -21,12 +22,17 @@ class Student {
      *
      * @param int $user_id The ID of the associated user.
      * @param string $student_id The unique student ID (e.g., a student number).
-     * @param string $course The course name.
+     * @param string $course The combined course string (e.g., "BSIT : Web Development").
      * @param int $year The year level.
      * @param string $section The section name.
+     * @param string|null $major_name (Ignored by this specific create method if 'course' already contains major)
      * @return bool True on success, false on failure.
      */
-    public function create($user_id, $student_id, $course, $year, $section) {
+    public function create($user_id, $student_id, $course, $year, $section, $major_name = null) {
+        // The $course parameter is expected to already be the combined "Course : Major" string
+        // The $major_name parameter is explicitly added to the signature based on previous discussions,
+        // but its value is expected to be part of $course for this specific CREATE query.
+        
         $query = "INSERT INTO " . $this->table_name . "
                   SET
                       user_id = ?,
@@ -61,36 +67,34 @@ class Student {
         return false;
     }
 
-    // Add this method to your Student class
-/**
- * Gets student details by user_id
- * 
- * @param int $user_id The user ID
- * @return array|false Student data if found, false otherwise
- */
-public function getByUserId($user_id) {
-    $query = "SELECT id, user_id, student_id, course, year, section, created_at
-              FROM " . $this->table_name . "
-              WHERE user_id = ? LIMIT 1";
+    /**
+     * Retrieves student details by user ID.
+     * @param int $user_id
+     * @return array|false Student data if found, false otherwise.
+     */
+    public function getByUserId($user_id) {
+        $query = "SELECT id, user_id, student_id, course, year, section, created_at
+                  FROM " . $this->table_name . "
+                  WHERE user_id = ? LIMIT 1";
 
-    $stmt = $this->conn->prepare($query);
-    if (!$stmt) {
-        error_log("Student Model getByUserId - Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("Student Model getByUserId - Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param("i", $user_id);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            $student_data = $result->fetch_assoc();
+            $stmt->close();
+            return $student_data;
+        }
+
+        error_log("Student Model getByUserId - Execute failed: (" . $stmt->errno . ") " . $stmt->error);
+        $stmt->close();
         return false;
     }
-
-    $stmt->bind_param("i", $user_id);
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $student_data = $result->fetch_assoc();
-        $stmt->close();
-        return $student_data;
-    }
-
-    error_log("Student Model getByUserId - Execute failed: (" . $stmt->errno . ") " . $stmt->error);
-    $stmt->close();
-    return false;
-}
 
     /**
      * Finds a student by their unique student_id and returns their details.
@@ -129,13 +133,13 @@ public function getByUserId($user_id) {
      * @return int|false The user_id if found, false otherwise.
      */
     public function getUserIdByStudentId($student_id) {
-        $query = "SELECT user_id FROM " . $this->table_name . " WHERE id = ? LIMIT 1"; // Assuming 'id' is the primary key of the students table
+        $query = "SELECT user_id FROM " . $this->table_name . " WHERE id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("Student Model getUserIdByStudentId - Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
             return false;
         }
-        $stmt->bind_param("i", $student_id); // 'i' for integer type of student_id (primary key)
+        $stmt->bind_param("i", $student_id);
         if (!$stmt->execute()) {
             error_log("Student Model getUserIdByStudentId - Execute failed: (" . $stmt->errno . ") " . $stmt->error);
             $stmt->close();
@@ -147,7 +151,6 @@ public function getByUserId($user_id) {
 
         return $row ? (int)$row['user_id'] : false;
     }
-
 
     /**
      * Updates an existing student record.
@@ -166,7 +169,7 @@ public function getByUserId($user_id) {
                       course = ?,
                       year = ?,
                       section = ?
-                  WHERE id = ?"; // 'id' is the primary key for the students table
+                  WHERE id = ?";
 
         $stmt = $this->conn->prepare($query);
 
@@ -179,7 +182,6 @@ public function getByUserId($user_id) {
         $course = htmlspecialchars(strip_tags($course));
         $section = htmlspecialchars(strip_tags($section));
 
-        // Bind values: 'sisi' specifies types: string (course), integer (year), string (section), integer (id)
         $stmt->bind_param("sisi", $course, $year, $section, $id);
 
         if ($stmt->execute()) {
@@ -194,8 +196,6 @@ public function getByUserId($user_id) {
 
     /**
      * Deletes a student record by its internal ID (primary key).
-     * This method only deletes the student record itself. The calling API (delete_student.php)
-     * is responsible for deleting the associated user record to maintain data integrity.
      *
      * @param int $id The internal ID (primary key) of the student record to delete.
      * @return bool True on success, false on failure.
@@ -210,7 +210,7 @@ public function getByUserId($user_id) {
             return false;
         }
 
-        $stmt->bind_param("i", $id); // 'i' for integer type of id
+        $stmt->bind_param("i", $id);
 
         if ($stmt->execute()) {
             $stmt->close();

@@ -95,7 +95,7 @@ if ($is_faculty) {
             </select>
 
             <input type="hidden" id="course_major_db" name="course_major_db"
-                   value="<?= htmlspecialchars($is_faculty ? ($faculty_assigned_course_major ?? '') : '') ?>">
+                    value="<?= htmlspecialchars($is_faculty ? ($faculty_assigned_course_major ?? '') : '') ?>">
 
             <div class="form-group" id="major-group"
                 <?php
@@ -108,6 +108,7 @@ if ($is_faculty) {
                         $show_major_group = true;
                     }
                 }
+                // For admin, we want it hidden initially, the JS will show it on course selection
                 echo $show_major_group ? '' : 'style="display: none;"';
                 ?>
             >
@@ -138,8 +139,10 @@ if ($is_faculty) {
                 </select>
             </div>
 
-            <input type="text" name="code" id="code" placeholder="Enter Exam Code">
+            <input type="text" name="code" id="code" placeholder="Enter Exam Code" required>
+            <input type="number" id="duration" name="duration" min="1" placeholder="e.g., 60" required>
         </div>
+
         <button type="button" id="add_button">Add Question</button>
         <button type="submit" id="submit_button">Submit</button>
     </form>

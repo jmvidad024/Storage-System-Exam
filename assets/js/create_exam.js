@@ -4,16 +4,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const majorSelect = document.getElementById('major');
     const courseMajorDb = document.getElementById('course_major_db'); // Hidden input for combined course:major
 
-    // PHP variables are now available globally:
-    // const isFaculty;
-    // const facultyAssignedCourseMajor;
-    // const coursesAndMajors;
+    // Define which courses have majors globally within this DOMContentLoaded scope
+    const coursesAndMajors = {
+        'Education': ['Science', 'Math', 'English', 'History'],
+        'Engineering': ['Civil', 'Electrical', 'Mechanical', 'Computer'], // Added from PHP
+        'Computer Science': [], // Added from PHP
+        'Information Technology': [] // Added from PHP
+    };
 
-    /**
-     * Updates the major dropdown based on the selected course.
-     * Also updates the hidden course_major_db field.
-     * This function now takes an optional 'preselectedMajorValue' for initial setup.
-     */
     function updateMajorsAndHiddenField(preselectedMajorValue = null) {
         const selectedCourse = courseSelect.value;
         const majors = coursesAndMajors[selectedCourse] || [];
@@ -41,9 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCombinedHiddenField();
     }
 
-    /**
-     * Updates the hidden course_major_db field with the combined "Course : Major" string.
-     */
     function updateCombinedHiddenField() {
         const selectedCourse = courseSelect.value;
         const selectedMajor = majorSelect.value;
@@ -57,9 +52,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- Event Listener for Course Selection Change ---
+    // This needs to be attached BEFORE initial setup, so it's ready for user interaction
+    courseSelect.addEventListener('change', function() {
+        updateMajorsAndHiddenField(); // When course changes, update majors without pre-selection
+    });
+
     // --- Initial setup on page load ---
-    if (isFaculty) {
-        if (facultyAssignedCourseMajor) {
+    if (typeof isFaculty !== 'undefined' && isFaculty) { // Add typeof check for robustness
+        if (typeof facultyAssignedCourseMajor !== 'undefined' && facultyAssignedCourseMajor) {
             const parts = facultyAssignedCourseMajor.split(' : ', 2);
             const facultyCourse = parts[0];
             const facultyMajor = parts[1] || '';
@@ -75,21 +76,28 @@ document.addEventListener('DOMContentLoaded', function() {
             majorSelect.setAttribute('disabled', 'disabled');
         }
     } else {
-        // For Admin (or non-faculty roles), trigger initial population based on current state
-        updateMajorsAndHiddenField(); // No pre-selected major needed for admin initial load
+        // For Admin (or non-faculty roles), ensure initial state is correct.
+        // The course select starts with "Select Course". If it ever has a value (e.g., from
+        // a saved form or pre-filling), then updateMajorsAndHiddenField() should be called
+        // with that value. Since it starts empty, no major should show.
+        // The key is that when an admin *selects* a course, the 'change' event listener
+        // will handle showing the majors.
+        // We don't need to call updateMajorsAndHiddenField() here for admins initially
+        // because the majorGroup is hidden by default and the dropdown is empty.
+        // The 'change' event listener on courseSelect will take care of it when an admin
+        // actually picks a course.
     }
 
 
+    const question_form = document.getElementById("question_form");
+    const add_button = document.getElementById("add_button");
+    let question_count = 1;
 
-const question_form = document.getElementById("question_form");
-const add_button = document.getElementById("add_button");
-let question_count = 1;
-
-// Declare modal elements globally but assign them inside DOMContentLoaded
-let confirmationModal;
-let confirmSubmitBtn;
-let cancelSubmitBtn;
-let modalFormSummary; // New: Reference to the summary container
+    // Declare modal elements globally but assign them inside DOMContentLoaded
+    let confirmationModal;
+    let confirmSubmitBtn;
+    let cancelSubmitBtn;
+    let modalFormSummary; // New: Reference to the summary container
 
     // Assign modal elements here after the DOM is fully loaded
     confirmationModal = document.getElementById("confirmationModal");
@@ -244,191 +252,190 @@ let modalFormSummary; // New: Reference to the summary container
         question_count++;
     });
 
-    // Define which courses have majors
-    const majorsByCourse = {
-        'Education': ['Science', 'Math', 'English', 'History'],
-        // Add other courses with majors if needed
-    };
+    // Function to reindex questions and choices (no changes needed here)
+    function reindexQuestions() {
+        const containers = document.querySelectorAll('.question_container');
+        let new_question_index = 1;
 
-   
+        containers.forEach((div) => {
+            const qIndex = new_question_index;
 
-    // Trigger initial setup
-    courseSelect.dispatchEvent(new Event('change'));
-
-    
-// Function to reindex questions and choices (no changes needed here)
-function reindexQuestions() {
-    const containers = document.querySelectorAll('.question_container');
-    let new_question_index = 1;
-
-    containers.forEach((div) => {
-        const qIndex = new_question_index;
-
-        const questionLabel = div.querySelector('label');
-        if (questionLabel) {
-            questionLabel.textContent = `Question ${qIndex}:`;
-            questionLabel.htmlFor = `question_${qIndex}`;
-        }
-
-        const questionInput = div.querySelector('.question-input');
-        if (questionInput) {
-            questionInput.name = `question_${qIndex}`;
-            questionInput.id = `question_${qIndex}`;
-        }
-
-        const answerInput = div.querySelector('.answer-input');
-        if (answerInput) {
-            answerInput.name = `answer_${qIndex}`;
-            answerInput.id = `answer_${qIndex}`;
-        }
-
-        const addOptionButton = div.querySelector('.add-option-btn');
-        if (addOptionButton) {
-            addOptionButton.id = `add_option_${qIndex}`;
-        }
-
-        const choiceInputs = div.querySelectorAll('.choice-input');
-        choiceInputs.forEach((input, choiceIndex) => {
-            input.name = `choices_${qIndex}[]`;
-            input.id = `choice_${qIndex}_${choiceIndex + 1}`;
-        });
-
-        const removeChoiceButtons = div.querySelectorAll('.remove-choice-btn');
-        removeChoiceButtons.forEach((btn, i) => {
-             btn.id = `remove_choice_${qIndex}_${i + 1}`;
-        });
-
-        new_question_index++;
-    });
-
-    question_count = containers.length + 1;
-}
-
-// --- NEW FUNCTION: Generate Modal Summary ---
-function generateModalSummary() {
-    let summaryHtml = '';
-
-    // 1. Get Title and Instruction
-    const title = document.getElementById('title').value;
-    const instruction = document.getElementById('instruction').value;
-    const course = document.getElementById('course_major_db').value;
-
-    if (title) {
-        summaryHtml += `<div class="summary-title">Exam Title: ${title}</div>`;
-    }
-    if (instruction) {
-        summaryHtml += `<div class="summary-instruction">Instruction: ${instruction}</div>`;
-    }
-    if (course) {
-        summaryHtml += `<div class="summary-course">Course: ${course}</div>`; // Add to summary
-    }
-
-    // 2. Get all questions
-    const questionContainers = document.querySelectorAll('.question_container');
-
-    if (questionContainers.length === 0) {
-        summaryHtml += '<p>No questions added yet.</p>';
-    } else {
-        questionContainers.forEach((qContainer, qIndex) => {
-            const questionText = qContainer.querySelector('.question-input').value;
-            const rightAnswer = qContainer.querySelector('.answer-input').value;
-            const choiceInputs = qContainer.querySelectorAll('.choice-input');
-
-            summaryHtml += `<h3>Question ${qIndex + 1}: ${questionText || '[Empty Question]'}</h3>`;
-            summaryHtml += `<ul>`;
-
-            if (choiceInputs.length === 0) {
-                summaryHtml += `<li>No choices added.</li>`;
-            } else {
-                choiceInputs.forEach((choiceInput, choiceIndex) => {
-                    summaryHtml += `<li>Choice ${choiceIndex + 1}: ${choiceInput.value || '[Empty Choice]'}</li>`;
-                });
+            const questionLabel = div.querySelector('label');
+            if (questionLabel) {
+                questionLabel.textContent = `Question ${qIndex}:`;
+                questionLabel.htmlFor = `question_${qIndex}`;
             }
 
-            summaryHtml += `<li>Right Answer: <span class="right-answer">${rightAnswer || '[Empty Answer]'}</span></li>`;
-            summaryHtml += `</ul>`;
+            const questionInput = div.querySelector('.question-input');
+            if (questionInput) {
+                questionInput.name = `question_${qIndex}`;
+                questionInput.id = `question_${qIndex}`;
+            }
+
+            const answerInput = div.querySelector('.answer-input');
+            if (answerInput) {
+                answerInput.name = `answer_${qIndex}`;
+                answerInput.id = `answer_${qIndex}`;
+            }
+
+            const addOptionButton = div.querySelector('.add-option-btn');
+            if (addOptionButton) {
+                addOptionButton.id = `add_option_${qIndex}`;
+            }
+
+            const choiceInputs = div.querySelectorAll('.choice-input');
+            choiceInputs.forEach((input, choiceIndex) => {
+                input.name = `choices_${qIndex}[]`;
+                input.id = `choice_${qIndex}_${choiceIndex + 1}`;
+            });
+
+            const removeChoiceButtons = div.querySelectorAll('.remove-choice-btn');
+            removeChoiceButtons.forEach((btn, i) => {
+                btn.id = `remove_choice_${qIndex}_${i + 1}`;
+            });
+
+            new_question_index++;
         });
+
+        question_count = containers.length + 1;
     }
 
-    // Insert the generated HTML into the summary div
-    if (modalFormSummary) {
-        modalFormSummary.innerHTML = summaryHtml;
-    } else {
-        console.error("Error: modalFormSummary element not found. Cannot display summary.");
-    }
-}
+    // --- NEW FUNCTION: Generate Modal Summary ---
+    function generateModalSummary() {
+        let summaryHtml = '';
 
-});
+        // 1. Get Title and Instruction
+        const title = document.getElementById('title').value;
+        const instruction = document.getElementById('instruction').value;
+        const course = document.getElementById('course_major_db').value;
+        const duration = document.getElementById('duration').value;
 
+        if (title) {
+            summaryHtml += `<div class="summary-title">Exam Title: ${title}</div>`;
+        }
+        if (instruction) {
+            summaryHtml += `<div class="summary-instruction">Instruction: ${instruction}</div>`;
+        }
+        if (course) {
+            summaryHtml += `<div class="summary-course">Course: ${course}</div>`; // Add to summary
+        }if (duration) {
+            summaryHtml += `<div class="summary-duration">Duration: ${duration} minutes</div>`;
+        }
 
+        // 2. Get all questions
+        const questionContainers = document.querySelectorAll('.question_container');
 
-// Function to send form data (no changes needed here)
-function sendFormData() {
-    const questions = [];
-    const questionContainers = document.querySelectorAll('.question_container');
+        if (questionContainers.length === 0) {
+            summaryHtml += '<p>No questions added yet.</p>';
+        } else {
+            questionContainers.forEach((qContainer, qIndex) => {
+                const questionText = qContainer.querySelector('.question-input').value;
+                const rightAnswer = qContainer.querySelector('.answer-input').value;
+                const choiceInputs = qContainer.querySelectorAll('.choice-input');
 
-    // Iterate through each question container to build the 'questions' array
-    questionContainers.forEach((qContainer, index) => {
-        const questionText = qContainer.querySelector('.question-input').value;
-        const answer = qContainer.querySelector('.answer-input').value;
-        const choiceInputs = qContainer.querySelectorAll('.choice-input');
+                summaryHtml += `<h3>Question ${qIndex + 1}: ${questionText || '[Empty Question]'}</h3>`;
+                summaryHtml += `<ul>`;
 
-        const choices = [];
-        // Iterate through each choice input within the current question
-        choiceInputs.forEach(choiceInput => {
-            choices.push({ "choice_text": choiceInput.value }); // Create choice objects
-        });
+                if (choiceInputs.length === 0) {
+                    summaryHtml += `<li>No choices added.</li>`;
+                } else {
+                    choiceInputs.forEach((choiceInput, choiceIndex) => {
+                        summaryHtml += `<li>Choice ${choiceIndex + 1}: ${choiceInput.value || '[Empty Choice]'}</li>`;
+                    });
+                }
 
-        // Push the assembled question object into the 'questions' array
-        questions.push({
-            "question_text": questionText,
-            "answer": answer,
-            "choices": choices
-        });
-    });
-
-    // Assemble the final JSON object to be sent
-    const jsonObject = {
-        "title": document.getElementById('title').value,
-        "instruction": document.getElementById('instruction').value,
-        "year": document.getElementById('year').value,
-        "section": document.getElementById('section').value,
-        "code": document.getElementById('code').value,
-        "course": document.getElementById('course_major_db').value,
-        "questions": questions
-    };
-
-    // Make the fetch request with the correctly structured JSON
-    fetch("../api/exam.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(jsonObject) // Stringify the structured JSON
-    })
-    .then(response => {
-        if (!response.ok) {
-            // Improved error handling to log the server's error message
-            return response.json().then(err => { 
-                throw new Error(`HTTP error! status: ${response.status}, message: ${err.message || JSON.stringify(err)}`); 
+                summaryHtml += `<li>Right Answer: <span class="right-answer">${rightAnswer || '[Empty Answer]'}</span></li>`;
+                summaryHtml += `</ul>`;
             });
         }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Server response:", data);
-        alert("Form submitted successfully!");
-        // Reset the form and clear dynamic elements after successful submission
-        question_form.reset();
-        document.querySelectorAll('.question_container').forEach(container => container.remove());
-        question_count = 1; // Reset question counter for new entries
-        reindexQuestions(); // Ensure UI state is consistent
-        courseSelect.value = facultyAssignedCourseMajor.split(' : ', 2)[0];
-                     // Re-populate and re-select major for faculty
-                     updateMajorsAndHiddenField(facultyAssignedCourseMajor.split(' : ', 2)[1] || '');
-    })
-    .catch(error => {
-        console.error("Error submitting form:", error);
-        alert("Error submitting form. Please check the console for details.");
-    });
-}
+
+        // Insert the generated HTML into the summary div
+        if (modalFormSummary) {
+            modalFormSummary.innerHTML = summaryHtml;
+        } else {
+            console.error("Error: modalFormSummary element not found. Cannot display summary.");
+        }
+    }
+
+    // Function to send form data (moved inside DOMContentLoaded)
+    function sendFormData() {
+        const questions = [];
+        const questionContainers = document.querySelectorAll('.question_container');
+
+        // Iterate through each question container to build the 'questions' array
+        questionContainers.forEach((qContainer, index) => {
+            const questionText = qContainer.querySelector('.question-input').value;
+            const answer = qContainer.querySelector('.answer-input').value;
+            const choiceInputs = qContainer.querySelectorAll('.choice-input');
+
+            const choices = [];
+            // Iterate through each choice input within the current question
+            choiceInputs.forEach(choiceInput => {
+                choices.push({ "choice_text": choiceInput.value }); // Create choice objects
+            });
+
+            // Push the assembled question object into the 'questions' array
+            questions.push({
+                "question_text": questionText,
+                "answer": answer,
+                "choices": choices
+            });
+        });
+
+        const durationValue = document.getElementById('duration').value;
+
+        // Assemble the final JSON object to be sent
+        const jsonObject = {
+            "title": document.getElementById('title').value,
+            "instruction": document.getElementById('instruction').value,
+            "year": document.getElementById('year').value,
+            "section": document.getElementById('section').value,
+            "code": document.getElementById('code').value,
+            "course": document.getElementById('course_major_db').value,
+            "duration_minutes": parseInt(durationValue, 10),
+            "questions": questions
+        };
+
+        // Make the fetch request with the correctly structured JSON
+        fetch("../api/exam.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(jsonObject) // Stringify the structured JSON
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Improved error handling to log the server's error message
+                return response.json().then(err => {
+                    alert("Error submitting form: " + err.message);
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${err.message || JSON.stringify(err)}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Server response:", data);
+            alert("Form submitted successfully!");
+            question_form.reset();
+            document.querySelectorAll('.question_container').forEach(container => container.remove());
+            question_count = 1; // Reset question counter for new entries
+            reindexQuestions(); // Ensure UI state is consistent
+
+            if (typeof isFaculty !== 'undefined' && isFaculty && typeof facultyAssignedCourseMajor !== 'undefined' && facultyAssignedCourseMajor) {
+                const parts = facultyAssignedCourseMajor.split(' : ', 2);
+                const facultyCourse = parts[0];
+                const facultyMajor = parts[1] || '';
+
+                courseSelect.value = facultyCourse;
+                updateMajorsAndHiddenField(facultyMajor);
+            } else {
+                updateMajorsAndHiddenField();
+            }
+        })
+        .catch(error => {
+            console.error("Error submitting form:", error);
+        });
+    }
+
+});

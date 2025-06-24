@@ -12,18 +12,18 @@ class ExamModel {
     }
 
     public function splitCourseMajor($combined_course) {
-    if (strpos($combined_course, ':') !== false) {
-        $parts = explode(':', $combined_course, 2);
+        if (strpos($combined_course, ':') !== false) {
+            $parts = explode(':', $combined_course, 2);
+            return [
+                'course' => trim($parts[0]),
+                'major' => trim($parts[1])
+            ];
+        }
         return [
-            'course' => trim($parts[0]),
-            'major' => trim($parts[1])
+            'course' => trim($combined_course),
+            'major' => null
         ];
     }
-    return [
-        'course' => trim($combined_course),
-        'major' => null
-    ];
-}
 
     /**
      * Fetches a full exam by its ID, including all questions and their choices.
@@ -38,8 +38,7 @@ class ExamModel {
             return false;
         }
 
-        // Fetch main exam details
-        $query = "SELECT exam_id, title, instruction, year, section, code, course FROM " . $this->exams_table . " WHERE exam_id = ? LIMIT 1";
+        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes FROM " . $this->exams_table . " WHERE exam_id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getExamById: Main exam query prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
@@ -68,9 +67,8 @@ class ExamModel {
         $stmt_q = $this->conn->prepare($questions_query);
         if (!$stmt_q) {
             error_log("ExamModel->getExamById: Questions query prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
-            // Return main exam data even if questions fail, to avoid breaking the API completely
-            $exam['questions'] = []; 
-            return $exam; 
+            $exam['questions'] = [];
+            return $exam;
         }
         $stmt_q->bind_param("i", $exam_id);
         if (!$stmt_q->execute()) {
@@ -83,24 +81,22 @@ class ExamModel {
 
         $questions = [];
         while ($question = $questions_result->fetch_assoc()) {
-            // Ensure question_id is valid before fetching choices
             if (!isset($question['question_id']) || !is_numeric($question['question_id'])) {
                 error_log("ExamModel->getExamById: Question fetched without valid question_id, skipping choices for: " . var_export($question, true));
-                $question['choices'] = []; // Ensure choices array is set
+                $question['choices'] = [];
                 $questions[] = $question;
-                continue; // Skip this problematic question and move to the next
+                continue;
             }
 
-            // Fetch choices for each question
             $choices_query = "SELECT choice_id, choice_text FROM " . $this->choices_table . " WHERE question_id = ?";
             $stmt_c = $this->conn->prepare($choices_query);
             if (!$stmt_c) {
                 error_log("ExamModel->getExamById: Choices query prepare failed for QID " . $question['question_id'] . ": (" . $this->conn->errno . ") " . $this->conn->error);
-                $question['choices'] = []; // Add empty choices array
+                $question['choices'] = [];
                 $questions[] = $question;
-                continue; // Move to next question
+                continue;
             }
-            $q_id_int = (int)$question['question_id']; // Cast to int for binding
+            $q_id_int = (int)$question['question_id'];
             $stmt_c->bind_param("i", $q_id_int);
             if (!$stmt_c->execute()) {
                 error_log("ExamModel->getExamById: Choices query execute failed for QID " . $question['question_id'] . ": (" . $stmt_c->errno . ") " . $stmt_c->error);
@@ -174,8 +170,7 @@ class ExamModel {
             return false;
         }
 
-        // Fetch main exam details by code to get the exam_id
-        $query = "SELECT exam_id FROM " . $this->exams_table . " WHERE code = ? LIMIT 1";
+        $query = "SELECT exam_id FROM " . $this->exams_table . " WHERE code = ? LIMIT 1"; // Only fetch exam_id
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getExamByCode: Main exam query prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
@@ -195,7 +190,7 @@ class ExamModel {
             return false; // Exam not found or ID missing
         }
 
-        // Now, reuse getExamById to get full details (questions, choices)
+        // Now, reuse getExamById to get full details (questions, choices, and duration)
         return $this->getExamById((int)$exam_data['exam_id']);
     }
 
@@ -209,49 +204,53 @@ class ExamModel {
      * @param int $year
      * @param string $section
      * @param string $code
+     * @param string $course
+     * @param string|null $major
+     * @param int $duration_minutes // NEW PARAMETER
      * @return bool True on success, false on failure.
      */
-    public function updateExamMain($exam_id, $title, $instruction, $year, $section, $code, $course, $major = null) {
-    // Combine course and major if major is provided
-    $full_course = $course;
-    if (!empty($major)) {
-        $full_course = $course . ' : ' . $major;
-    }
+    public function updateExamMain($exam_id, $title, $instruction, $year, $section, $code, $course, $major = null, $duration_minutes) {
+        $full_course = $course;
+        if (!empty($major)) {
+            $full_course = $course . ' : ' . $major;
+        }
 
-    $query = "UPDATE " . $this->exams_table . "
-              SET title = ?, 
-                  instruction = ?, 
-                  year = ?, 
-                  section = ?, 
-                  code = ?, 
-                  course = ?
-              WHERE exam_id = ?";
-    
-    $stmt = $this->conn->prepare($query);
-    if (!$stmt) { 
-        error_log("ExamModel->updateExamMain: Prepare failed: " . $this->conn->error); 
-        throw new Exception("Prepare failed: " . $this->conn->error); 
-    }
-    
-    $stmt->bind_param("ssisssi", 
-        $title, 
-        $instruction, 
-        $year, 
-        $section, 
-        $code, 
-        $full_course, 
-        $exam_id
-    );
-    
-    if ($stmt->execute()) {
+        $query = "UPDATE " . $this->exams_table . "
+                    SET title = ?,
+                        instruction = ?,
+                        year = ?,
+                        section = ?,
+                        code = ?,
+                        course = ?,
+                        duration_minutes = ?
+                    WHERE exam_id = ?";
+
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("ExamModel->updateExamMain: Prepare failed: " . $this->conn->error);
+            throw new Exception("Prepare failed: " . $this->conn->error);
+        }
+
+        $stmt->bind_param("ssisssii",
+            $title,
+            $instruction,
+            $year,
+            $section,
+            $code,
+            $full_course,
+            $duration_minutes,
+            $exam_id
+        );
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        }
+
+        error_log("ExamModel->updateExamMain: Execute failed: " . $stmt->error);
         $stmt->close();
-        return true;
+        return false;
     }
-    
-    error_log("ExamModel->updateExamMain: Execute failed: " . $stmt->error);
-    $stmt->close();
-    return false;
-}
 
     /**
      * Creates a new question for an exam.
@@ -305,7 +304,6 @@ class ExamModel {
      * @return bool True on success, false on failure.
      */
     public function deleteQuestion($question_id) {
-        // Assuming ON DELETE CASCADE from questions to choices, otherwise delete choices explicitly here
         $query = "DELETE FROM " . $this->questions_table . " WHERE question_id = ?";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) { error_log("ExamModel->deleteQuestion: Prepare failed: " . $this->conn->error); throw new Exception("Prepare failed: " . $this->conn->error); }
@@ -448,7 +446,7 @@ class ExamModel {
      * @return array An array of all exam records, or an empty array if none found.
      */
     public function getAllExams() {
-        $query = "SELECT exam_id, title, instruction, year, section, code, course FROM " . $this->exams_table . " ORDER BY title ASC";
+        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes FROM " . $this->exams_table . " ORDER BY title ASC";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getAllExams: Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
@@ -469,11 +467,46 @@ class ExamModel {
         return $exams;
     }
 
+
+    /**
+     * Fetches exams associated with a specific course.
+     *
+     * @param string $course The combined course string (e.g., "BSIT : Web Development").
+     * @return array An array of exam records for the given course, or an empty array if none found.
+     */
+    public function getExamsByCourse($course) {
+        if (empty($course)) {
+            error_log("ExamModel->getExamsByCourse: Empty course provided.");
+            return [];
+        }
+        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes FROM " . $this->exams_table . " WHERE course = ? ORDER BY title ASC";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("ExamModel->getExamsByCourse: Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
+            return [];
+        }
+        $stmt->bind_param("s", $course);
+        if (!$stmt->execute()) {
+            error_log("ExamModel->getExamsByCourse: Execute failed: (" . $stmt->errno . ") " . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+        $result = $stmt->get_result();
+
+        $exams = [];
+        while ($row = $result->fetch_assoc()) {
+            $exams[] = $row;
+        }
+        $stmt->close();
+        return $exams;
+    }
+
+
     /**
      * Deletes an exam and its associated questions and choices.
      * This method assumes proper foreign key constraints with ON DELETE CASCADE
      * are set up in the database for questions (referencing exams) and choices (referencing questions).
-     * If not, you'd need to manually delete from those tables first within this method.
+     * student_exam_attempts deletion is handled in the API layer or by another cascading FK.
      *
      * @param int $exam_id The ID of the exam to delete.
      * @return bool True on success, false on failure.
@@ -484,32 +517,63 @@ class ExamModel {
             return false;
         }
 
-        // Deleting the exam record. Questions and Choices should cascade delete if your DB is set up.
-        // The API already handles student_exam_attempts separately.
-        $query = "DELETE FROM " . $this->exams_table . " WHERE exam_id = ?";
-        $stmt = $this->conn->prepare($query);
-        if (!$stmt) {
-            error_log("ExamModel->deleteExam: Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
+        // It's safer to ensure all dependent data is removed.
+        // Even if you have CASCADE set up, explicitly managing it within a transaction
+        // ensures consistency and better error handling, especially for student_exam_attempts.
+        // Since the API now explicitly deletes student_attempts, we focus on exam, questions, choices.
+        $this->conn->begin_transaction();
+        try {
+            // Get all question_ids related to this exam
+            $question_ids = [];
+            $stmt = $this->conn->prepare("SELECT question_id FROM " . $this->questions_table . " WHERE exam_id = ?");
+            if (!$stmt) throw new Exception("Prepare select questions failed: " . $this->conn->error);
+            $stmt->bind_param("i", $exam_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            while($row = $result->fetch_assoc()) {
+                $question_ids[] = $row['question_id'];
+            }
+            $stmt->close();
+
+            // Delete choices related to these questions
+            if (!empty($question_ids)) {
+                $placeholders = implode(',', array_fill(0, count($question_ids), '?'));
+                $stmt = $this->conn->prepare("DELETE FROM " . $this->choices_table . " WHERE question_id IN ($placeholders)");
+                if (!$stmt) throw new Exception("Prepare delete choices failed: " . $this->conn->error);
+                $types = str_repeat('i', count($question_ids));
+                $stmt->bind_param($types, ...$question_ids);
+                if (!$stmt->execute()) throw new Exception("Execute delete choices failed: " . $stmt->error);
+                $stmt->close();
+            }
+
+            // Delete questions for the exam
+            $stmt = $this->conn->prepare("DELETE FROM " . $this->questions_table . " WHERE exam_id = ?");
+            if (!$stmt) throw new Exception("Prepare delete questions failed: " . $this->conn->error);
+            $stmt->bind_param("i", $exam_id);
+            if (!$stmt->execute()) throw new Exception("Execute delete questions failed: " . $stmt->error);
+            $stmt->close();
+
+            // Finally, delete the exam itself
+            $query = "DELETE FROM " . $this->exams_table . " WHERE exam_id = ?";
+            $stmt = $this->conn->prepare($query);
+            if (!$stmt) throw new Exception("Prepare delete exam failed: " . $this->conn->error);
+            $stmt->bind_param("i", $exam_id);
+            if (!$stmt->execute()) throw new Exception("Execute delete exam failed: " . $stmt->error);
+            $affected_rows = $stmt->affected_rows;
+            $stmt->close();
+
+            if ($affected_rows > 0) {
+                $this->conn->commit();
+                return true;
+            } else {
+                $this->conn->rollback(); // No exam found to delete
+                error_log("ExamModel->deleteExam: No exam found with ID: " . $exam_id);
+                return false;
+            }
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("Error deleting exam (ID: $exam_id) in ExamModel: " . $e->getMessage());
             return false;
         }
-        $stmt->bind_param("i", $exam_id);
-        $success = $stmt->execute();
-        $affected_rows = $stmt->affected_rows;
-        $error = $stmt->error;
-        $stmt->close();
-
-        if ($success && $affected_rows > 0) {
-            return true;
-        } elseif ($affected_rows === 0) {
-            error_log("ExamModel->deleteExam: No exam found with ID: " . $exam_id);
-            return false; // Exam not found
-        } else {
-            error_log("ExamModel->deleteExam: Execute failed for ID " . $exam_id . ": " . $error);
-            return false; // Deletion failed for other reasons
-        }
     }
-
-    
-
 }
-

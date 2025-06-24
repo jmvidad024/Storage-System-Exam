@@ -1,17 +1,18 @@
 <?php
-ini_set('display_errors', 0);
+ini_set('display_errors', 0); // Keep this for production, but you had it enabled for debugging
 ini_set('display_startup_errors', 0);
-error_reporting(E_ALL);
+error_reporting(E_ALL); // Keep for robust error logging, even if not displayed
 
 require_once '../env_loader.php';
 require_once '../assets/config/database.php';
 require_once '../models/user.php';
-require_once '../models/examAttempt.php'; // NEW
+require_once '../models/examAttempt.php';
+
 require_once '../controllers/AuthMiddleware.php';
 
 $database = new Database();
 $user = new User($database);
-$studentExamAttempt = new StudentExamAttempt($database); // NEW
+$studentExamAttempt = new StudentExamAttempt($database);
 
 // Authenticate and ensure role is student
 AuthMiddleware::authenticate($user);
@@ -23,8 +24,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === "GET") {
     try {
-        // Get student's user ID from session
-         $user_id = $user->getId();
+        // Get student's user ID from session (already authenticated by AuthMiddleware)
+        $user_id = $user->getId();
 
         // Get student's details including course
         $studentDetails = $user->getStudentDetails($user_id);
@@ -40,15 +41,34 @@ if ($method === "GET") {
 
         // Get all exams matching the student's year, section, AND course
         $conn = $database->getConnection();
-        
-        // Option 1: Exact match (if exams.course contains "Course : Major")
-        $stmt = $conn->prepare("SELECT exam_id, title, instruction, year, section, code, course 
-                               FROM exams 
-                               WHERE year = ? AND section = ? AND course = ?");
-                               
+
+        $query = "
+            SELECT 
+                e.exam_id, 
+                e.title, 
+                e.instruction, 
+                e.year, 
+                e.section, 
+                e.code, 
+                e.course -- Ensure 'course' column is selected
+            FROM 
+                exams e
+            WHERE 
+                e.year = ? AND e.section = ? AND e.course = ?
+            ORDER BY 
+                e.exam_id DESC
+        ";
+
+        $stmt = $conn->prepare($query);
+
         if (!$stmt) {
-            throw new Exception("Prepare failed: " . $conn->error);
+            // Handle prepare error more robustly
+            $errorInfo = $conn->errorInfo();
+            throw new Exception("SQL Prepare failed: " . ($errorInfo[2] ?? "Unknown error"));
         }
+        
+        // Correct parameter binding for mysqli prepare
+        // 'iss' for integer, string, string (year, section, course)
         $stmt->bind_param("iss", $student_year, $student_section, $student_course);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -60,12 +80,14 @@ if ($method === "GET") {
         $stmt->close();
 
         // Get all exam attempts for the student, including their completion status and attempt_id
+        // This method should return: [ { 'exam_id', 'id' as 'attempt_id', 'is_completed' }, ... ]
         $student_attempts = $studentExamAttempt->getStudentAttemptedExams($user_id);
+        
         // Convert to a map for easier lookup: [exam_id => {is_completed, attempt_id}]
         $attempts_map = [];
         foreach ($student_attempts as $attempt) {
-            $attempts_map[$attempt['exam_id']] = [
-                'is_completed' => $attempt['is_completed'],
+            $attempts_map[(int)$attempt['exam_id']] = [
+                'is_completed' => (bool)$attempt['is_completed'], // Cast to boolean for clarity
                 'attempt_id' => $attempt['attempt_id']
             ];
         }
@@ -99,10 +121,11 @@ if ($method === "GET") {
         http_response_code(500);
         echo json_encode([
             "status" => "error",
-            "message" => "Server error. Please try again later."
+            "message" => "Server error. Please try again later. (Error: " . $e->getMessage() . ")" // Added error message for debugging
         ]);
     }
 } else {
     http_response_code(405);
     echo json_encode(["status" => "error", "message" => "Method not allowed"]);
 }
+?>

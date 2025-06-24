@@ -21,6 +21,20 @@ AuthMiddleware::requireRole($user, ['admin', 'faculty']);
 
 $userName = $_SESSION['username'] ?? 'Guest';
 $userRole = $_SESSION['role'];
+$userId = $user->getId(); // Get the authenticated user's ID
+
+$facultyAssignedCourseMajor = null;
+if ($userRole === 'faculty') {
+    // Fetch faculty's assigned course/major from the User model
+    $facultyAssignedCourseMajor = $user->getFacultyCourseMajor($userId);
+    if (!$facultyAssignedCourseMajor) {
+        // Handle case where faculty is not assigned a course, e.g., redirect or show message
+        $_SESSION['error_message'] = "Your faculty account is not assigned to a course. Please contact the administrator to view student data.";
+        header("Location: dashboard.php"); // Redirect to dashboard if not assigned
+        exit();
+    }
+}
+
 
 if (isset($_POST['logout'])) {
     $_SESSION = array();
@@ -58,7 +72,7 @@ if (isset($_POST['logout'])) {
             <li><a href="dashboard.php" class="nav-link">Dashboard Home</a></li>
             <li><a href="createExam.php" class="nav-link">Create Exam</a></li>
             <li><a href="getExam.php" class="nav-link">Manage Exams</a></li>
-            <li><a href="manageCourses.php" class="nav-link active">Manage Courses & Sections</a></li> <!-- NEW: Added link -->
+            <li><a href="manageCourses.php" class="nav-link active">Manage Courses & Sections</a></li>
             <?php if ($userRole === 'admin'): ?>
                 <li><a href="createAccount.php" class="nav-link">Create Account</a></li>
             <?php endif ?>
@@ -69,13 +83,17 @@ if (isset($_POST['logout'])) {
         <h2>Course and Section Management</h2>
         <p>This page allows you to view and manage your courses, year levels, and sections based on existing student data.</p>
 
-        <div class="course-management-container">
-            <div id="course_list_container">
-                <p class="loading-indicator">Loading courses and sections...</p>
-                <div class="error-message hidden"></div>
-                <!-- Course and section data will be dynamically loaded here by JavaScript -->
+        <?php if ($userRole === 'faculty' && !$facultyAssignedCourseMajor): ?>
+            <p class="error-message">Error: Your faculty account is not assigned to a course. Please contact the administrator.</p>
+        <?php else: ?>
+            <div class="course-management-container">
+                <div id="course_list_container">
+                    <p class="loading-indicator">Loading courses and sections...</p>
+                    <div class="error-message hidden"></div>
+                    <!-- Course and section data will be dynamically loaded here by JavaScript -->
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
     </main>
 
     <!-- Student List Modal (Existing, but added a placeholder for its content) -->
@@ -94,7 +112,7 @@ if (isset($_POST['logout'])) {
                                 <th>Username</th>
                                 <th>Full Name</th>
                                 <th>Email</th>
-                                <th>Actions</th> <!-- NEW Column -->
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="studentListTableBody">
@@ -113,11 +131,11 @@ if (isset($_POST['logout'])) {
             <h2>Edit Student Details</h2>
             <form id="editStudentForm" class="edit-form">
                 <input type="hidden" id="editStudentId" name="student_id">
-                <input type="hidden" id="editUserId" name="user_id"> <!-- Hidden field for user_id -->
+                <input type="hidden" id="editUserId" name="user_id">
 
                 <div class="form-group">
                     <label for="editStudentUsername">Username</label>
-                    <input type="text" id="editStudentUsername" name="username" readonly disabled> <!-- Username is readonly -->
+                    <input type="text" id="editStudentUsername" name="username" readonly disabled>
                 </div>
                 <div class="form-group">
                     <label for="editStudentName">Full Name</label>
@@ -131,10 +149,10 @@ if (isset($_POST['logout'])) {
                     <label for="editStudentCourse">Course</label>
                     <select name="course" id="editStudentCourse">
                         <option value="">Select Course</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Information Technology">Information Technology</option>
-                            <option value="Education">Education</option>
-                            <option value="Engineering">Engineering</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Education">Education</option>
+                        <option value="Engineering">Engineering</option>
                     </select>
                 </div>
 
@@ -145,7 +163,6 @@ if (isset($_POST['logout'])) {
                     </select>
                 </div>
 
-                <!-- Final value sent -->
                 <input type="hidden" id="editStudentCourseMajor" name="course_combined">
                 <div class="form-group">
                     <label for="editStudentYear">Year</label>
@@ -174,9 +191,9 @@ if (isset($_POST['logout'])) {
     </div>
 
     <input type="hidden" id="userRole" value="<?php echo htmlspecialchars($userRole); ?>">
+    <input type="hidden" id="facultyAssignedCourseMajor" value="<?php echo htmlspecialchars($facultyAssignedCourseMajor ?? ''); ?>">
 
-    <!-- General dashboard JS for dropdown (if not already combined) -->
     <script src="../assets/js/dashboard.js"></script>
-    <script src="../assets/js/manage_courses.js"></script> <!-- New JS for this page -->
+    <script src="../assets/js/manage_courses.js"></script>
 </body>
 </html>

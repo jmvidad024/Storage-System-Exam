@@ -1,10 +1,12 @@
 <?php
 
-require_once 'student.php';
+require_once 'student.php'; 
 
 class User {
-    private $table_name = "users"; // Your students table name
+    private $table_name = "users";
     private $conn;
+    private $db;
+
     public $id;
     private $username;
     private $name; 
@@ -12,35 +14,41 @@ class User {
     public $role;
     private $password_hash;
     private $isAuthenticated = false;
-    private $db;
+    private $isVerified = false; // New property
 
     public function __construct(Database $database) {
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        $this->db = $database;
+        $this->conn = $database->getConnection();
+        $this->loadFromSession();
     }
-    $this->db = $database;
-    $this->conn = $database->getConnection(); // <---- ADD THIS LINE
-    $this->loadFromSession();
-}
 
     public function login($username, $password) {
-        // Use your existing database connection
-        $conn = $this->db->getConnection(); // Get the mysqli connection object
-        $stmt = $conn->prepare(
-            "SELECT id, username, name, email, role, password_hash FROM users WHERE username = ?"
+        $stmt = $this->conn->prepare(
+            "SELECT id, username, name, email, role, password_hash, is_verified FROM users WHERE username = ?"
         );
         
         $stmt->bind_param('s', $username);
         $stmt->execute();
         $result = $stmt->get_result();
         $userData = $result->fetch_assoc();
-        
+        $stmt->close();
+
         if ($userData && password_verify($password, $userData['password_hash'])) {
+            // Check if account is verified
+            if ($userData['is_verified'] == 0) {
+                // Account not verified
+                return 'not_verified'; 
+            }
+
             $this->id = $userData['id'];
             $this->username = $userData['username'];
-            $this->name = $userData['name']; // Load name into property
-            $this->email = $userData['email']; // Load email into property
+            $this->name = $userData['name'];
+            $this->email = $userData['email'];
             $this->role = $userData['role'];
+            $this->isVerified = (bool)$userData['is_verified']; // Set new property
             $this->isAuthenticated = true;
             
             $this->saveToSession();
@@ -50,36 +58,58 @@ class User {
         return false;
     }
 
- public function countStudents() {
+    public function countStudents() {
         $query = "SELECT COUNT(*) as student_count FROM " . $this->table_name . " WHERE role = 'student'";
-        
-        // Using object-oriented MySQLi
         $result = $this->conn->query($query); 
-        
         if ($result) {
-            $row = $result->fetch_assoc(); // Use fetch_assoc() for associative array
-            $result->free(); // Free the result set
+            $row = $result->fetch_assoc();
+            $result->free();
             return $row['student_count'];
         } else {
-            // Handle error, e.g., log it or throw an exception
-            error_log("Error counting students: " . $this->conn->error);
-            return 0; // Return 0 or handle error appropriately
+            error_log("Error counting all students: " . $this->conn->error);
+            return 0;
         }
     }
 
-    // In your User class, update or add this method:
-public function getStudentDetails($user_id) {
-    $student = new Student($this->db);
-    return $student->getByUserId($user_id);
-}
+    public function getStudentDetails($user_id) {
+        $student = new Student($this->db);
+        return $student->getByUserId($user_id);
+    }
+
+    public function countStudentsByCourseMajor($course, $major = null) {
+        $course_major_filter = $course;
+        if (!empty($major)) {
+            $course_major_filter .= ' : ' . $major;
+        }
+
+        $query = "SELECT COUNT(sd.user_id) as total_students
+                  FROM students sd
+                  JOIN users u ON sd.user_id = u.id
+                  WHERE u.role = 'student' AND sd.course = ?"; 
+
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("User::countStudentsByCourseMajor - Prepare failed: " . $this->conn->error);
+            return 0;
+        }
+
+        $stmt->bind_param("s", $course_major_filter);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+
+        return $row['total_students'] ?? 0;
+    }
 
     public function logout() {
         $this->id = null;
         $this->username = null;
-        $this->name = null; // Clear name
-        $this->email = null; // Clear email
+        $this->name = null;
+        $this->email = null;
         $this->role = null;
         $this->isAuthenticated = false;
+        $this->isVerified = false;
         
         session_unset();
         session_destroy();
@@ -109,16 +139,22 @@ public function getStudentDetails($user_id) {
         return $this->email;
     }
 
-    // New: Method to get user ID
     public function getId() {
         return $this->id;
+    }
+
+    public function getIsVerified() {
+        return $this->isVerified;
     }
 
     private function loadFromSession() {
         if (isset($_SESSION['user_id'])) {
             $this->id = $_SESSION['user_id'];
             $this->username = $_SESSION['username'];
+            $this->name = $_SESSION['name'] ?? null;
+            $this->email = $_SESSION['email'] ?? null;
             $this->role = $_SESSION['role'];
+            $this->isVerified = $_SESSION['is_verified'] ?? false; // Load verification status
             $this->isAuthenticated = true;
         }
     }
@@ -127,178 +163,170 @@ public function getStudentDetails($user_id) {
         $_SESSION['user_id'] = $this->id;
         $_SESSION['username'] = $this->username;
         $_SESSION['name'] = $this->name;
+        $_SESSION['email'] = $this->email;
         $_SESSION['role'] = $this->role;
+        $_SESSION['is_verified'] = $this->isVerified; // Save verification status
         $_SESSION['logged_in'] = true;
     }
 
-    
-    public function create($username, $name, $hashed_password, $email, $role) {
-        $conn = $this->db->getConnection(); // Get the mysqli connection object
+    /**
+     * Creates a new user account.
+     *
+     * @param string $username
+     * @param string $name
+     * @param string $hashed_password
+     * @param string $email
+     * @param string $role
+     * @param string|null $verification_token (Optional) Token for email verification.
+     * @param int $is_verified (Optional) 0 for unverified, 1 for verified. Defaults to 0.
+     * @return int|false New user ID on success, false on failure.
+     */
+    public function create($username, $name, $hashed_password, $email, $role, $verification_token = null, $is_verified = 0) {
+        $query = "INSERT INTO users (username, name, password_hash, email, role, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($query);
 
-        // Query to insert record - ensure 'password_hash' column name matches your DB
-        $query = "INSERT INTO users (username, name, password_hash, email, role) VALUES (?, ?, ?, ?, ?)";
+        if (!$stmt) {
+            error_log("User::create - Prepare failed: " . $this->conn->error);
+            return false;
+        }
 
-        // Prepare statement
-        $stmt = $conn->prepare($query);
+        // Sanitize token before binding
+        $verification_token = htmlspecialchars(strip_tags($verification_token));
 
-        // Bind values
-        // 'sssss' specifies the types of the parameters: string, string, string, string, string
-        $stmt->bind_param("sssss", $username, $name, $hashed_password, $email, $role);
+        $stmt->bind_param("ssssssi", $username, $name, $hashed_password, $email, $role, $verification_token, $is_verified);
 
-        // Execute query
         if ($stmt->execute()) {
-            $new_user_id = $conn->insert_id; // THIS IS THE IMPORTANT PART
+            $new_user_id = $this->conn->insert_id;
             $stmt->close();
-            return $new_user_id; // Return the integer ID
+            return $new_user_id;
         } 
-
-        // For debugging:
-        // error_log("Error creating user: " . $stmt->error);
+        error_log("User::create - Execute failed: " . $stmt->error);
         $stmt->close();
         return false;
     }
 
-    public function getFacultyCourseMajor($user_id) {
-        $query = "SELECT course FROM faculty_details WHERE user_id = ? LIMIT 0,1";
+    /**
+     * Verifies a user by their verification token.
+     * @param string $token The verification token.
+     * @return bool True on success, false if token is invalid or user not found.
+     */
+    public function verifyUserByToken(string $token): bool {
+        $query = "UPDATE " . $this->table_name . " SET is_verified = 1, verification_token = NULL WHERE verification_token = ? AND is_verified = 0";
         $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("User::verifyUserByToken - Prepare failed: " . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $affected_rows = $stmt->affected_rows;
+        $stmt->close();
+        return $affected_rows > 0;
+    }
+
+
+    public function getFacultyCourseMajor($user_id) {
+        $query = "SELECT course FROM faculty_details WHERE user_id = ? LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("User::getFacultyCourseMajor - Prepare Error: " . $this->conn->error);
+            return null;
+        }
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
+        $stmt->close();
 
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
-            return $row['course']; // Returns "Course : Major" or "Course"
+            return $row['course'];
         }
         return null;
     }
 
     public function findByUsername($username) {
-        $conn = $this->db->getConnection(); // Get the mysqli connection object
-        $query = "SELECT id, username, name, email, role, password_hash FROM users WHERE username = ? LIMIT 1";
-        
-        $stmt = $conn->prepare($query);
+        $query = "SELECT id, username, name, email, role, password_hash, is_verified FROM users WHERE username = ? LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+             error_log("User::findByUsername - Prepare Error: " . $this->conn->error);
+             return false;
+        }
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
+        $stmt->close();
         
         if ($result->num_rows > 0) {
             $userData = $result->fetch_assoc();
-            $stmt->close();
             return $userData;
         }
         
-        $stmt->close();
         return false;
     }
 
-    public function findByEmail() {
-        $query = "SELECT id, username, name, email, role, password_hash
-                  FROM " . $this->table_name . "
-                  WHERE email = ?
-                  LIMIT 0,1";
-
-        // Line 168: This is where the error occurred
+    public function findByEmail($email) {
+        $query = "SELECT id, username, name, email, role, password_hash, is_verified FROM " . $this->table_name . " WHERE email = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
-
         if (!$stmt) {
-            // Add error logging for prepare failures
-            error_log("MySQLi Prepare Error: " . $this->conn->error);
+            error_log("User::findByEmail - MySQLi Prepare Error: " . $this->conn->error);
             return false;
         }
-
-        // Bind the parameter (s for string)
-        $this->email = htmlspecialchars(strip_tags($this->email)); // Sanitize email
-        $stmt->bind_param('s', $this->email);
-
+        $stmt->bind_param('s', $email);
         $stmt->execute();
-        $result = $stmt->get_result(); // Get the result set
-
+        $result = $stmt->get_result();
+        $stmt->close();
         $row = $result->fetch_assoc();
-
-        if ($row) {
-            $this->id = $row['id'];
-            $this->username = $row['username'];
-            $this->name = $row['name'];
-            $this->email = $row['email'];
-            $this->role = $row['role'];
-            $this->password_hash = $row['password_hash'];
-            return $row;
-        }
-        return false;
+        return $row;
     }
 
-
-    // New method to update a user's password
     public function updatePassword($newHashedPassword) {
-        $query = "UPDATE " . $this->table_name . "
-                  SET password_hash = ?          -- Changed to positional placeholder
-                  WHERE id = ?";            
-
+        $query = "UPDATE " . $this->table_name . " SET password_hash = ? WHERE id = ?";
         $stmt = $this->conn->prepare($query);
-
         if (!$stmt) {
-            // It's good practice to log prepare errors
-            error_log("MySQLi Prepare Error (updatePassword): " . $this->conn->error);
+            error_log("User::updatePassword - MySQLi Prepare Error: " . $this->conn->error);
             return false;
         }
-
-        // Sanitize password (already hashed, so strip_tags is fine)
-        // Note: For ID, ensure it's an integer if it's an INT in DB.
-        // For password, it's a string.
         $newHashedPassword_sanitized = htmlspecialchars(strip_tags($newHashedPassword));
-        $id_sanitized = htmlspecialchars(strip_tags($this->id)); // Ensure this is safe if ID is coming from user input.
-                                                              // For internal use like this, if $this->id is set from DB, it's generally safe.
-
-        // Use bind_param for mysqli: 's' for string (password), 'i' for integer (id)
-        $stmt->bind_param('si', $newHashedPassword_sanitized, $id_sanitized);
-
+        $stmt->bind_param('si', $newHashedPassword_sanitized, (int)$this->id);
         if ($stmt->execute()) {
-            $stmt->close(); // Close the statement after execution
+            $stmt->close();
             return true;
         } else {
-            // Log execution errors
-            error_log("MySQLi Execute Error (updatePassword): " . $stmt->error);
-            $stmt->close(); // Close the statement even on error
+            error_log("User::updatePassword - MySQLi Execute Error: " . $stmt->error);
+            $stmt->close();
             return false;
         }
     }
 
     public function createFacultyDetails($userId, $course = null) {
-        $query = "INSERT INTO faculty_details (user_id, course)
-                  VALUES (?, ?)";
+        $query = "INSERT INTO faculty_details (user_id, course) VALUES (?, ?)";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
-            error_log("Faculty Details Prepare Error: " . $this->conn->error);
+            error_log("User::createFacultyDetails - Prepare Error: " . $this->conn->error);
             return false;
         }
-
-        // Sanitize the course name if it's coming from user input
         $course_sanitized = htmlspecialchars(strip_tags($course));
-
-        // 'is' => i for user_id (integer), s for course (string)
         $stmt->bind_param('is', $userId, $course_sanitized);
-
         if ($stmt->execute()) {
             $stmt->close();
             return true;
         } else {
-            error_log("Faculty Details Execute Error: " . $stmt->error);
+            error_log("User::createFacultyDetails - Execute Error: " . $stmt->error);
             $stmt->close();
             return false;
         }
     }
 
-    // Method to get full user profile including faculty-specific details if applicable
     public function getFullUserProfile($userId) {
-        $query = "SELECT u.id, u.username, u.name, u.email, u.role,
-                         fd.course -- Only fetch 'course' from faculty_details
-                  FROM " . $this->table_name . " u
-                  LEFT JOIN faculty_details fd ON u.id = fd.user_id
-                  WHERE u.id = ? LIMIT 0,1";
+        $query = "SELECT u.id, u.username, u.name, u.email, u.role, u.is_verified,
+                                    fd.course
+                             FROM " . $this->table_name . " u
+                             LEFT JOIN faculty_details fd ON u.id = fd.user_id
+                             WHERE u.id = ? LIMIT 1";
 
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
-            error_log("Get Full User Profile Prepare Error: " . $this->conn->error);
+            error_log("User::getFullUserProfile - Prepare Error: " . $this->conn->error);
             return false;
         }
         $stmt->bind_param('i', $userId);
@@ -310,14 +338,11 @@ public function getStudentDetails($user_id) {
         return $row;
     }
 
-    // You might also want a method to update faculty details
     public function updateFacultyCourse($userId, $newCourse) {
-        $query = "UPDATE faculty_details
-                  SET course = ?, updated_at = CURRENT_TIMESTAMP
-                  WHERE user_id = ?";
+        $query = "UPDATE faculty_details SET course = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
-            error_log("Update Faculty Course Prepare Error: " . $this->conn->error);
+            error_log("User::updateFacultyCourse - Prepare Error: " . $this->conn->error);
             return false;
         }
         $newCourse_sanitized = htmlspecialchars(strip_tags($newCourse));
@@ -327,7 +352,7 @@ public function getStudentDetails($user_id) {
             $stmt->close();
             return true;
         } else {
-            error_log("Update Faculty Course Execute Error: " . $stmt->error);
+            error_log("User::updateFacultyCourse - Execute Error: " . $stmt->error);
             $stmt->close();
             return false;
         }
@@ -337,8 +362,7 @@ public function getStudentDetails($user_id) {
         $query = "UPDATE " . $this->table_name . " SET name = ?, email = ? WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
-            error_log("User Model updateNameAndEmail - Prepare failed: " . $this->conn->error);
-            echo(['error'=>"here"]);
+            error_log("User::updateNameAndEmail - Prepare failed: " . $this->conn->error);
             return false;
         }
         $stmt->bind_param("ssi", $name, $email, $id);
@@ -346,17 +370,16 @@ public function getStudentDetails($user_id) {
             $stmt->close();
             return true;
         }
-        error_log("User Model updateNameAndEmail - Execute failed: " . $stmt->error);
+        error_log("User::updateNameAndEmail - Execute failed: " . $stmt->error);
         $stmt->close();
         return false;
     }
 
     public function delete($id) {
-        $conn = $this->db->getConnection(); // Get the mysqli connection object for this method
         $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
-        $stmt = $conn->prepare($query); // Use local $conn here
+        $stmt = $this->conn->prepare($query);
         if (!$stmt) {
-            error_log("User Model Delete - Prepare failed: " . $conn->error); // Log error from $conn
+            error_log("User::delete - Prepare failed: " . $this->conn->error);
             return false;
         }
 
@@ -365,9 +388,22 @@ public function getStudentDetails($user_id) {
             $stmt->close();
             return true;
         }
-        error_log("User Model Delete - Execute failed: " . $stmt->error);
+        error_log("User::delete - Execute failed: " . $stmt->error);
         $stmt->close();
         return false;
     }
+
+    public function splitCourseMajor($combined_course) {
+        if (strpos($combined_course, ':') !== false) {
+            $parts = explode(':', $combined_course, 2);
+            return [
+                'course' => trim($parts[0]),
+                'major' => trim($parts[1])
+            ];
+        }
+        return [
+            'course' => trim($combined_course),
+            'major' => null
+        ];
+    }
 }
-?>

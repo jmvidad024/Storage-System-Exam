@@ -113,6 +113,11 @@ if (isset($_GET['status']) && isset($_GET['message'])) {
                     
                     <label for="code">Exam Code</label>
                     <input type="text" name="code" id="code" placeholder="Enter Exam Code" required>
+
+                    <div class="form-group">
+                        <label for="duration_minutes">Duration (minutes)</label>
+                        <input type="number" name="duration_minutes" id="duration_minutes" placeholder="Enter duration in minutes" min="1" required>
+                    </div>
                 </div>
 
                 <div id="questions_container">
@@ -121,8 +126,6 @@ if (isset($_GET['status']) && isset($_GET['message'])) {
 
                 <button type="button" id="add_question_btn" class="btn btn-add">Add New Question</button>
                 <button type="submit" id="save_exam_btn" class="btn btn-submit">Save Exam Changes</button>
-
-                <!-- Removed: Button to delete all attempts for this exam is now handled by JS after save -->
             </form>
         </div>
     </div>

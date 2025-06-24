@@ -6,18 +6,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const yearSelect = document.getElementById('year');
     const sectionSelect = document.getElementById('section');
     const codeInput = document.getElementById('code');
+    const durationInput = document.getElementById('duration_minutes'); // NEW: Reference to duration input
     const questionsContainer = document.getElementById('questions_container');
     const addQuestionBtn = document.getElementById('add_question_btn');
     const saveExamBtn = document.getElementById('save_exam_btn');
-    const courseInput = document.getElementById('course');
-
+    const courseInput = document.getElementById('course'); // This refers to the course SELECT element
 
     const courseSelect = document.getElementById('course');
     const majorGroup = document.getElementById('major-group');
     const majorSelect = document.getElementById('major');
     const courseMajorDb = document.getElementById('course_major_db');
-
-    
 
     // Define which courses have majors
     const majorsByCourse = {
@@ -47,6 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
             option.textContent = major;
             majorSelect.appendChild(option);
         });
+        // If there was a preselected major, try to set it
+        // This logic correctly handles pre-selection *after* options are added
         if (majorSelect.dataset.preselectedMajor) {
             majorSelect.value = majorSelect.dataset.preselectedMajor;
             // Clear preselected major after attempting to set it
@@ -55,8 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Manually trigger change to ensure hidden field is updated if major was preselected
         majorSelect.dispatchEvent(new Event('change'));
     });
-
-    
 
     // Update hidden field when major is selected
     majorSelect.addEventListener('change', function() {
@@ -70,13 +68,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Trigger initial setup
-    courseSelect.dispatchEvent(new Event('change'));
-
-
-
-
-    
     // Elements for delete attempts modal (modal is now triggered by successful save)
     const deleteAttemptsConfirmationModal = document.getElementById('deleteAttemptsConfirmationModal');
     const confirmDeleteAttemptsBtn = document.getElementById('confirmDeleteAttemptsBtn');
@@ -192,45 +183,36 @@ document.addEventListener('DOMContentLoaded', function() {
         yearSelect.value = initialExamData.year;
         sectionSelect.value = initialExamData.section;
         codeInput.value = initialExamData.code;
-        
+        durationInput.value = initialExamData.duration_minutes; // Set duration value
 
         const fullCourseMajor = initialExamData.course || '';
-const [coursePart, majorPart] = fullCourseMajor.split(':').map(part => part.trim());
+        const [coursePart, majorPart] = fullCourseMajor.split(':').map(part => part.trim());
 
-courseInput.value = coursePart;
-courseMajorDb.value = fullCourseMajor;
+        courseInput.value = coursePart;
+        courseMajorDb.value = fullCourseMajor;
 
-if (majorsByCourse[coursePart]) {
-    // Preload the major dropdown
-    majorGroup.style.display = 'block';
-    majorSelect.innerHTML = '<option value="">Select Major</option>';
-    majorsByCourse[coursePart].forEach(function(major) {
-        const option = document.createElement('option');
-        option.value = major;
-        option.textContent = major;
-        majorSelect.appendChild(option);
-    });
+        // Store majorPart in a dataset attribute before dispatching the change event
+        // This allows the 'change' event listener on courseSelect to pick it up later.
+        if (majorPart) {
+            majorSelect.dataset.preselectedMajor = majorPart;
+        }
 
-    if (majorPart) {
-        majorSelect.value = majorPart;
-    }
-}
+        // Trigger initial course change event to correctly set up major dropdown based on loaded data
+        courseSelect.dispatchEvent(new Event('change'));
 
         if (initialExamData.questions && initialExamData.questions.length > 0) {
             initialExamData.questions.forEach(q => addQuestionBlock(q));
         }
     } else {
         let errorMessage = 'Exam not found or invalid ID. Cannot edit.';
-        // Check if the exam ID is present in the hidden input
         if (!examIdHidden.value) {
             errorMessage += ' No exam ID was passed to the page URL.';
         } else {
             errorMessage += ` Exam ID '${examIdHidden.value}' might not exist in the database or there was a server error loading data.`;
         }
         displayMessage('error', errorMessage);
-        saveExamBtn.disabled = true; // Disable save if no data
+        saveExamBtn.disabled = true;
         addQuestionBtn.disabled = true;
-        // deleteAttemptsBtn is now removed, so no need to disable here
     }
 
     // --- Add Question Button Listener ---
@@ -253,29 +235,28 @@ if (majorsByCourse[coursePart]) {
             section: sectionSelect.value,
             code: codeInput.value.trim(),
             course: courseMajorDb.value.trim(),
+            duration_minutes: parseInt(durationInput.value), // Include duration
             questions: []
         };
 
         // Collect questions and choices
         document.querySelectorAll('.question-block').forEach(qBlock => {
-            // Only include questions that have text
             const questionTextElement = qBlock.querySelector('input[name^="question_"][name$="_text"]');
             const answerElement = qBlock.querySelector('input[name^="question_"][name$="_answer"]');
 
             if (!questionTextElement || !answerElement || questionTextElement.value.trim() === '') {
-                // Skip empty question blocks if they exist (though required should prevent this)
                 return;
             }
 
-            const qId = qBlock.dataset.questionId.startsWith('new_') ? null : parseInt(qBlock.dataset.questionId); // Null for new questions
+            const qId = qBlock.dataset.questionId.startsWith('new_') ? null : parseInt(qBlock.dataset.questionId);
             const questionText = questionTextElement.value.trim();
             const answer = answerElement.value.trim();
 
             const choices = [];
             qBlock.querySelectorAll('.choice-item').forEach(cItem => {
                 const choiceTextElement = cItem.querySelector('input[type="text"]');
-                if (choiceTextElement && choiceTextElement.value.trim() !== '') { // Only include non-empty choices
-                    const cId = cItem.dataset.choiceId.startsWith('new_c_') ? null : parseInt(cItem.dataset.choiceId); // Null for new choices
+                if (choiceTextElement && choiceTextElement.value.trim() !== '') {
+                    const cId = cItem.dataset.choiceId.startsWith('new_c_') ? null : parseInt(cItem.dataset.choiceId);
                     const choiceText = choiceTextElement.value.trim();
                     choices.push({ choice_id: cId, choice_text: choiceText });
                 }
@@ -290,7 +271,7 @@ if (majorsByCourse[coursePart]) {
         });
 
         try {
-            const response = await fetch(`../api/exam.php?exam_id=${examId}`, { // Send exam_id in URL for PUT
+            const response = await fetch(`../api/exam.php?exam_id=${examId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -305,7 +286,7 @@ if (majorsByCourse[coursePart]) {
                 saveExamBtn.disabled = false;
                 saveExamBtn.textContent = 'Save Exam Changes';
 
-                // NEW: Show confirmation modal after successful save
+                // Show confirmation modal after successful save
                 deleteAttemptsConfirmationModal.classList.add('show'); 
 
             } else {
@@ -319,10 +300,8 @@ if (majorsByCourse[coursePart]) {
         }
     });
 
-    // Removed: deleteAttemptsBtn.addEventListener as it's no longer a standalone button
-
     confirmDeleteAttemptsBtn.addEventListener('click', async () => {
-        deleteAttemptsConfirmationModal.classList.remove('show'); // Hide modal
+        deleteAttemptsConfirmationModal.classList.remove('show');
         const examId = examIdHidden.value;
         if (!examId) {
             displayMessage('error', 'Exam ID missing for attempt deletion.');
@@ -330,7 +309,6 @@ if (majorsByCourse[coursePart]) {
         }
 
         displayMessage('loading', 'Deleting all attempts for this exam...');
-        // No deleteAttemptsBtn to disable here, as it's not a standalone button anymore
 
         try {
             const response = await fetch(`../api/delete_exam_attempt.php?exam_id=${examId}`, {
@@ -343,7 +321,6 @@ if (majorsByCourse[coursePart]) {
 
             if (response.ok && data.status === 'success') {
                 displayMessage('success', data.message || 'All attempts successfully deleted.');
-                // Redirect after deletion
                 setTimeout(() => {
                     window.location.href = `getExam.php?message=attempts_deleted_for_exam`;
                 }, 2000);
@@ -353,13 +330,11 @@ if (majorsByCourse[coursePart]) {
         } catch (error) {
             console.error('Error deleting attempts:', error);
             displayMessage('error', `Failed to delete attempts: ${error.message}.`);
-            // If deletion fails, perhaps re-enable the save button if needed, or allow re-triggering deletion
         }
     });
 
     cancelDeleteAttemptsBtn.addEventListener('click', () => {
-        deleteAttemptsConfirmationModal.classList.remove('show'); // Hide modal
-        // If attempts are not deleted, simply redirect to getExam.php
+        deleteAttemptsConfirmationModal.classList.remove('show');
         setTimeout(() => {
             window.location.href = `getExam.php?message=exam_updated_attempts_kept`;
         }, 1000);
@@ -369,7 +344,6 @@ if (majorsByCourse[coursePart]) {
     window.addEventListener('click', function(event) {
         if (event.target === deleteAttemptsConfirmationModal) {
             deleteAttemptsConfirmationModal.classList.remove('show');
-            // If dismissed, also redirect as the save was successful anyway
             setTimeout(() => {
                 window.location.href = `getExam.php?message=exam_updated_modal_dismissed`;
             }, 1000);

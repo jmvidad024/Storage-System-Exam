@@ -9,61 +9,64 @@ require_once '../assets/config/database.php';
 require_once '../models/user.php';
 require_once '../controllers/AuthMiddleware.php';
 require_once '../models/student.php';
+require_once '../utils/Mailer.php'; // Include the Mailer utility
 
 // Initialize database connection
 $database = new Database();
-$db = $database->getConnection(); // Get the actual mysqli connection here
+$db = $database->getConnection();
 
-// Initialize models, passing the mysqli connection object
+// Initialize models
 $user = new User($database);
 $studentModel = new Student($database);
+$mailer = new Mailer(); // Initialize Mailer
 
 // Define hardcoded courses and majors (PHP mirror of JS data)
 $coursesAndMajors = [
     'Education' => ['Science', 'Math', 'English', 'History'],
     'Engineering' => ['Civil', 'Electrical', 'Mechanical', 'Computer'],
-    'Computer Science' => [] // No majors for Computer Science in this example
+    'Computer Science' => []
 ];
 
 // Authenticate and authorize (only Admin can create accounts)
 AuthMiddleware::authenticate($user);
 AuthMiddleware::requireRole($user, ['admin']);
 
-$message = ''; // To store success or error messages
-$registration_successful = false; // Flag to track overall success
+$message = '';
+$registration_successful = false;
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Collect and sanitize common input fields
-    $username = htmlspecialchars(trim($_POST['username'] ?? ''));
+    $username_input = htmlspecialchars(trim($_POST['username'] ?? '')); // This is the form's username field
     $name = htmlspecialchars(trim($_POST['name'] ?? ''));
     $password = $_POST['password'] ?? '';
     $email = htmlspecialchars(trim($_POST['email'] ?? ''));
     $role = htmlspecialchars(trim($_POST['role'] ?? ''));
 
-    // Collect role-specific inputs
-    $student_id = '';
-    $course_major = '';     // For student: combined course & major (e.g., "Education : Science")
-    $year = '';             // For student year
-    $section = '';          // For student section
-    $faculty_course_data = ''; // For faculty: combined course & major (e.g., "Education : Math")
+    // Role-specific inputs
+    $student_id = htmlspecialchars(trim($_POST['student_id'] ?? '')); // Student ID will become username for students
+    $course_major = htmlspecialchars(trim($_POST['course_major_db'] ?? '')); // Combined course & major
+    $year = htmlspecialchars(trim($_POST['year'] ?? ''));
+    $section = htmlspecialchars(trim($_POST['section'] ?? ''));
+    $faculty_course_data = htmlspecialchars(trim($_POST['faculty_course_data'] ?? '')); // For faculty
 
-    // Initialize errors array
     $errors = [];
+    $username_for_db = $username_input; // Default username for DB is from the form's username input
 
+    // Adjust username and validate role-specific fields
     if ($role === 'student') {
-        $student_id = htmlspecialchars(trim($_POST['student_id'] ?? ''));
-        // Get the combined string from the hidden field
-        $course_major = htmlspecialchars(trim($_POST['course_major_db'] ?? ''));
-        $year = htmlspecialchars(trim($_POST['year'] ?? ''));
-        $section = htmlspecialchars(trim($_POST['section'] ?? ''));
+        $username_for_db = $student_id; // Student ID becomes the username for students
+        if (empty($student_id)) $errors[] = "Student ID is required for students.";
+        if (empty($course_major)) $errors[] = "Course is required for students.";
+        if (empty($year)) $errors[] = "Year is required for students.";
+        if (!is_numeric($year) || $year < 1 || $year > 4) $errors[] = "Invalid Year (1-4) selected for students.";
+        if (empty($section)) $errors[] = "Section is required for students.";
 
         // Parse student course and major from the combined string for validation
         $course_parts = explode(' : ', $course_major, 2);
         $student_course_name = $course_parts[0];
         $student_major = $course_parts[1] ?? null;
 
-        // Basic validation for student course/major
         if (!array_key_exists($student_course_name, $coursesAndMajors)) {
             $errors[] = "Invalid student course selected.";
         } elseif ($student_major && !in_array($student_major, $coursesAndMajors[$student_course_name])) {
@@ -71,15 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
     } elseif ($role === 'faculty') {
-        // Get the combined string from the hidden field
-        $faculty_course_data = htmlspecialchars(trim($_POST['faculty_course_data'] ?? ''));
+        if (empty($faculty_course_data)) $errors[] = "Course is required for faculty.";
 
-        // Parse faculty course and major from the combined string for validation
         $faculty_parts = explode(' : ', $faculty_course_data, 2);
         $faculty_course_name = $faculty_parts[0];
         $faculty_major = $faculty_parts[1] ?? null;
 
-        // Basic validation for faculty course/major
         if (!empty($faculty_course_name) && !array_key_exists($faculty_course_name, $coursesAndMajors)) {
             $errors[] = "Invalid faculty course selected from the list.";
         } elseif ($faculty_major && !in_array($faculty_major, $coursesAndMajors[$faculty_course_name])) {
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // --- Server-side Validation (Common Fields) ---
-    if (empty($username)) $errors[] = "Username is required.";
+    if (empty($username_for_db)) $errors[] = "Username is required."; // Use the actual username for DB
     if (empty($name)) $errors[] = "Full Name is required.";
     if (empty($password)) $errors[] = "Password is required.";
     if (empty($email)) $errors[] = "Email is required.";
@@ -98,28 +98,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (strlen($password) < 6) $errors[] = "Password must be at least 6 characters long.";
     if (!in_array($role, ['admin', 'faculty', 'student'])) $errors[] = "Invalid role selected.";
 
-    // --- Server-side Validation (Role-Specific) ---
-    if ($role === 'student') {
-        if (empty($student_id)) $errors[] = "Student ID is required for students.";
-        if (empty($course_major)) $errors[] = "Course is required for students."; // This now holds Course : Major
-        if (empty($year)) $errors[] = "Year is required for students.";
-        if (!is_numeric($year) || $year < 1 || $year > 4) $errors[] = "Invalid Year (1-4) selected for students.";
-        if (empty($section)) $errors[] = "Section is required for students.";
-
-    } elseif ($role === 'faculty') {
-        if (empty($faculty_course_data)) $errors[] = "Course is required for faculty."; // This now holds Course : Major
-    }
-
     // Check for existing username/email/student_id BEFORE attempting database operations
     if (empty($errors)) {
-        if ($user->findByUsername($username)) {
-            $errors[] = "Username already taken. Please choose another.";
+        if ($user->findByUsername($username_for_db)) {
+            $errors[] = "Username/Student ID '{$username_for_db}' already exists. Please choose another.";
         }
         if ($user->findByEmail($email)) {
-            $errors[] = "Email already registered. Please use a different email or log in.";
+            $errors[] = "Email '{$email}' already registered. Please use a different email.";
         }
         if ($role === 'student' && $studentModel->findByStudentId($student_id)) {
-             $errors[] = "Student ID already registered. Please verify or use a different ID.";
+            $errors[] = "Student ID '{$student_id}' is already registered. Please verify or use a different ID.";
         }
     }
 
@@ -127,15 +115,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($errors)) {
         $message = '<p class="error">' . implode('<br>', $errors) . '</p>';
     } else {
-        // All validation passed, attempt to create user and their specific profile
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $verification_token = bin2hex(random_bytes(32)); // Generate token for email verification
+        $is_verified_status = 0; // Default to unverified
+
+        // For Admin/Faculty roles created by Admin, you might want them to be auto-verified
+        // Uncomment the following lines if Admin/Faculty accounts should be active immediately.
+        /*
+        if ($role === 'admin' || $role === 'faculty') {
+            $is_verified_status = 1;
+            $verification_token = null; // No token needed if auto-verified
+        }
+        */
 
         // --- Start Database Transaction ---
-        $db->begin_transaction(); // For mysqli
+        $db->begin_transaction();
 
         try {
-            // Create user in the 'users' table
-            $new_user_id = $user->create($username, $name, $hashed_password, $email, $role);
+            // Create user in the 'users' table, passing the verification token and initial verified status
+            $new_user_id = $user->create(
+                $username_for_db, // Use the appropriate username (student_id or direct input)
+                $name,
+                $hashed_password,
+                $email,
+                $role,
+                $verification_token,
+                $is_verified_status
+            );
 
             if (!$new_user_id) {
                 throw new Exception('Failed to create user account.');
@@ -143,10 +149,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // If the role is student, create a record in the 'students' table as well
             if ($role === 'student') {
-                // $course_major already contains "Course : Major" or "Course"
                 $course_parts = explode(' : ', $course_major, 2);
                 $student_course_name = $course_parts[0];
-                $student_major = $course_parts[1] ?? null; // Will be null if no major was selected/available
+                $student_major = $course_parts[1] ?? null;
 
                 if (!$studentModel->create($new_user_id, $student_id, $student_course_name, $year, $section, $student_major)) {
                     throw new Exception('Failed to create student profile.');
@@ -154,20 +159,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             // If the role is faculty, create a record in the 'faculty_details' table
             elseif ($role === 'faculty') {
-                // IMPORTANT: Pass the full $faculty_course_data string to createFacultyDetails
-                // This string already contains "Course : Major" or just "Course"
                 if (!$user->createFacultyDetails($new_user_id, $faculty_course_data)) {
                     throw new Exception('Failed to create faculty profile.');
                 }
             }
 
-            $db->commit(); // Commit transaction on success
-            $registration_successful = true;
-            $message = '<p class="success">Account created successfully! You can now <a href="login.php">log in</a>.</p>';
+            // Attempt to send verification email (only if account is not auto-verified)
+            if ($is_verified_status === 0) {
+                if ($mailer->sendVerificationEmail($email, $name, $verification_token, $username_for_db)) {
+                    $message = '<p class="success">Account created successfully! A verification email has been sent to ' . htmlspecialchars($email) . '. The user must verify their email before logging in.</p>';
+                    $registration_successful = true;
+                } else {
+                    // Log the email sending failure but still consider the account created
+                    error_log("Failed to send verification email for user ID: {$new_user_id}. Account created, but verification email might not have been received.");
+                    $message = '<p class="warning">Account created successfully, but failed to send verification email to ' . htmlspecialchars($email) . '. Please inform the user to contact support for verification.</p>';
+                    $registration_successful = true; // Still true, just with a warning
+                }
+            } else {
+                 // Account was auto-verified
+                 $message = '<p class="success">Account created and automatically verified successfully! User can now log in.</p>';
+                 $registration_successful = true;
+            }
+
+            $db->commit();
             $_POST = []; // Clear form data on success for fresh form
 
         } catch (Exception $e) {
-            $db->rollback(); // Rollback transaction on any error
+            $db->rollback();
             error_log("Account creation failed: " . $e->getMessage());
             $message = '<p class="error">Error creating account: ' . $e->getMessage() . '</p>';
         }
@@ -187,6 +205,14 @@ if ($db instanceof mysqli) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Account</title>
     <link rel="stylesheet" href="../assets/css/create_account.css">
+    <style>
+        /* Add some basic styles for the warning message */
+        .message-area.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+    </style>
 </head>
 <body>
     <header class="page-header">
@@ -197,15 +223,16 @@ if ($db instanceof mysqli) {
     <div class="container">
         <div class="registration-form-section">
             <?php if (!empty($message)): ?>
-                <div class="message-area">
+                <div class="message-area <?php echo $registration_successful ? ($mailer->sendVerificationEmail($email, $name, $verification_token, $username_for_db) ? 'success' : 'warning') : 'error'; ?>">
                     <?php echo $message; ?>
                 </div>
             <?php endif; ?>
 
             <form action="" method="POST" class="register-form">
-                <div class="form-group">
+                <div class="form-group" id="username_group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Choose a unique username" required value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
+                    <input type="text" id="username" name="username" placeholder="Choose a unique username" required 
+                           value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
@@ -242,7 +269,6 @@ if ($db instanceof mysqli) {
                             <?php foreach ($coursesAndMajors as $courseName => $majors): ?>
                                 <option value="<?= htmlspecialchars($courseName) ?>"
                                     <?php
-                                    // Logic to re-select based on faculty_course_data
                                     $current_faculty_data = $_POST['faculty_course_data'] ?? '';
                                     $selected_faculty_course_only = explode(' : ', $current_faculty_data, 2)[0];
                                     if ($selected_faculty_course_only === $courseName) {
@@ -279,7 +305,6 @@ if ($db instanceof mysqli) {
                             <?php foreach (array_keys($coursesAndMajors) as $courseName): ?>
                                 <option value="<?php echo htmlspecialchars($courseName); ?>"
                                     <?php
-                                    // Logic to re-select student course based on course_major_db
                                     $current_student_data = $_POST['course_major_db'] ?? '';
                                     $selected_student_course_only = explode(' : ', $current_student_data, 2)[0];
                                     if ($selected_student_course_only === $courseName) {

@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             } else {
                                 actionButtonHtml = `<a href="takeExam.php?exam_id=${exam.exam_id}" class="btn-take-exam">Take Exam</a>`;
                             }
-
                             examCard.innerHTML = `
                                 <h3>${exam.title || 'Untitled Exam'}</h3>
                                 <p>${exam.instruction || 'No instructions provided.'}</p>
