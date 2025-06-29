@@ -4,12 +4,14 @@
     width: 100%;
     max-width: 900px;
     margin: 30px auto;
-    background-color: #ffffff;
+    background-color: #34495e; /* Medium dark grey for container background */
     border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3); /* Darker shadow */
     padding: 30px;
+    color: #ecf0f1; /* Default text color for container */
 }
 
+/* Logout Button (assuming this is part of a general header/dropdown) */
 #logout-button {
     color: white;
     padding: 12px 16px;
@@ -17,7 +19,7 @@
     display: block;
     border: none;
     background: none;
-    width: 100%; /* Make button fill dropdown width */
+    width: 100%;
     text-align: left;
     cursor: pointer;
     font-size: 1rem;
@@ -25,8 +27,8 @@
 }
 
 #logout-button:hover {
-    background-color: #2c3e50; /* Darker on hover */
-    opacity: .5;
+    background-color: #4a627a; /* Darker blue on hover, consistent with back button */
+    opacity: 1; /* Maintain full opacity for better visibility on hover */
 }
 
 
@@ -35,19 +37,19 @@
     text-align: center;
     padding: 20px;
     font-style: italic;
-    color: #6c757d;
+    color: #bdc3c7; /* Lighter grey for informative text */
 }
 
 .course-management-container .error-message {
-    color: #dc3545;
+    color: #e74c3c; /* Red for errors */
     font-weight: bold;
-    display: none; /* Hidden by default, shown by JS on error */
+    display: none;
 }
 
 .course-management-container .no-data-message {
     text-align: center;
     padding: 20px;
-    color: #888;
+    color: #aebfd0; /* Lighter blue-grey for no data */
     font-style: italic;
 }
 
@@ -57,11 +59,11 @@
 }
 
 .course-block {
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
+    background-color: #465b74; /* Darker background for individual course blocks */
+    border: 1px solid #5d7f9e; /* Darker border */
     border-radius: 8px;
     margin-bottom: 15px;
-    overflow: hidden; /* Ensures border-radius applies to children */
+    overflow: hidden;
 }
 
 .course-header,
@@ -70,33 +72,34 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background-color: #e9ecef;
+    background-color: #5d7f9e; /* Medium dark blue/grey for headers */
     cursor: pointer;
-    border-bottom: 1px solid #dcdcdc;
+    border-bottom: 1px solid #6da2db; /* Blue border to stand out */
     transition: background-color 0.2s ease;
 }
 
 .course-header:hover,
 .year-header:hover {
-    background-color: #dee2e6;
+    background-color: #6da2db; /* Brighter blue on hover */
 }
 
 .course-header h3 {
     margin: 0;
     font-size: 1.4rem;
-    color: #2c3e50;
+    color: #ecf0f1; /* Light text color */
 }
 
 .year-header h4 {
     margin: 0;
     font-size: 1.2rem;
-    color: #34495e;
+    color: #ecf0f1; /* Light text color */
 }
 
 .toggle-icon {
     font-size: 1.2rem;
     font-weight: bold;
     transition: transform 0.2s ease;
+    color: #ecf0f1; /* Ensure icon is light */
 }
 
 /* Hidden content */
@@ -108,13 +111,13 @@
 .years-container,
 .sections-container {
     padding: 10px 20px;
-    background-color: #ffffff;
-    border-top: 1px solid #f0f0f0; /* Subtler border for nested containers */
+    background-color: #465b74; /* Consistent with course block background */
+    border-top: 1px solid #5d7f9e; /* Darker border for nested containers */
 }
 
 .years-container .year-block {
     margin-bottom: 10px;
-    border: 1px solid #f2f2f2;
+    border: 1px solid #5d7f9e;
     border-radius: 6px;
     overflow: hidden;
 }
@@ -127,13 +130,12 @@
 
 .sections-container .section-list li {
     padding: 10px 15px;
-    border-bottom: 1px dashed #f5f5f5;
-    color: #555;
+    border-bottom: 1px dashed #5d7f9e; /* Dashed dark border */
+    color: #bdc3c7; /* Lighter grey for list items */
     font-size: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Added for clickability */
     transition: background-color 0.2s ease;
 }
 
@@ -142,11 +144,12 @@
 }
 
 .sections-container .section-list li.clickable-section:hover {
-    background-color: #f0f0f0; /* Highlight on hover for clickable sections */
+    background-color: #5d7f9e; /* Highlight on hover for clickable sections */
+    color: #ecf0f1; /* Ensure text stays light on hover */
 }
 
-.student-count { /* Changed from .exam-count to .student-count */
-    background-color: #007bff;
+.student-count {
+    background-color: #3498db; /* Blue for student count badge */
     color: white;
     padding: 4px 8px;
     border-radius: 4px;
@@ -156,15 +159,15 @@
 
 /* Modal Styles - Shared between student list, edit, and delete confirmation */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 2000; /* Sit on top of everything */
+    display: none;
+    position: fixed;
+    z-index: 2000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8); /* Darker overlay */
     justify-content: center;
     align-items: center;
     opacity: 0;
@@ -173,30 +176,31 @@
 }
 
 .modal.show {
-    display: flex; /* Show using flex for centering */
+    display: flex;
     opacity: 1;
     visibility: visible;
 }
 
 .modal-content {
-    background-color: #ffffff;
+    background-color: #465b74; /* Darker background for modal content */
     margin: auto;
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5); /* Stronger shadow */
     position: relative;
     width: 90%;
-    max-width: 600px; /* Default max-width for smaller modals (edit/delete confirm) */
+    max-width: 600px;
     animation: fadeIn 0.3s ease-out;
+    color: #ecf0f1; /* Light text for modal content */
 }
 
 /* Specific class for larger modal for student list */
 .large-modal {
-    max-width: 900px; /* Wider for the student list table */
+    max-width: 900px;
 }
 
 .close-button {
-    color: #aaa;
+    color: #bdc3c7; /* Lighter grey for close button */
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -209,12 +213,12 @@
 
 .close-button:hover,
 .close-button:focus {
-    color: #333;
+    color: #ecf0f1; /* White on hover/focus */
     text-decoration: none;
 }
 
 .modal-content h2 {
-    color: #2c3e50;
+    color: #ecf0f1; /* Light text */
     margin-bottom: 20px;
     font-size: 1.8rem;
     text-align: center;
@@ -229,11 +233,11 @@
     padding: 10px;
     text-align: center;
     font-style: italic;
-    color: #6c757d;
+    color: #bdc3c7; /* Lighter grey */
 }
 
 .modal-body .error-message {
-    color: #dc3545;
+    color: #e74c3c; /* Red for error */
     font-weight: bold;
 }
 
@@ -242,67 +246,70 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    color: #ecf0f1; /* Default text color for table content */
 }
 
 .student-table th,
 .student-table td {
     padding: 12px 15px;
-    border: 1px solid #eee;
+    border: 1px solid #5d7f9e; /* Darker border */
     text-align: left;
 }
 
 .student-table th {
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: #5d7f9e; /* Darker background for table headers */
+    color: #ecf0f1; /* Light text */
     font-weight: bold;
     text-transform: uppercase;
     font-size: 0.9rem;
 }
 
 .student-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #465b74; /* Slightly different dark shade for even rows */
 }
 
 .student-table tbody tr:hover {
-    background-color: #f0f0f0;
+    background-color: #6da2db; /* Blue on hover */
 }
 
 .student-table .no-students-message {
     text-align: center;
     font-style: italic;
-    color: #888;
+    color: #aebfd0; /* Light blue-grey */
     padding: 20px;
 }
 
 /* Action Buttons (Edit/Delete) in Student Table */
 .student-table .actions {
-    white-space: nowrap; /* Keep buttons on one line */
-    text-align: center; /* Center buttons within their cell */
+    white-space: nowrap;
+    text-align: center;
 }
 
 .student-table .btn-action {
     padding: 6px 10px;
     font-size: 0.8rem;
     border-radius: 4px;
-    margin: 0 3px; /* Small space between buttons */
-    display: inline-block; /* For button styling */
-    min-width: 60px; /* Ensure buttons aren't too small */
+    margin: 0 3px;
+    display: inline-block;
+    min-width: 60px;
+    color: white; /* Ensure button text is white */
+    border: none; /* Remove default button border */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .student-table .btn-edit {
-    background-color: #007bff; /* Blue */
-    color: white;
+    background-color: #3498db; /* Blue */
 }
 .student-table .btn-edit:hover {
-    background-color: #0056b3;
+    background-color: #2980b9;
 }
 
 .student-table .btn-delete {
-    background-color: #dc3545; /* Red */
-    color: white;
+    background-color: #e74c3c; /* Red */
 }
 .student-table .btn-delete:hover {
-    background-color: #c82333;
+    background-color: #c0392b;
 }
 
 /* Edit Form Styling within Modal */
@@ -315,7 +322,7 @@
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #555;
+    color: #ecf0f1; /* Light text for labels */
 }
 
 .edit-form input[type="text"],
@@ -323,21 +330,22 @@
 .edit-form input[type="number"] {
     width: 100%;
     padding: 10px 15px;
-    border: 1px solid #ddd;
+    border: 1px solid #5d7f9e; /* Darker border */
     border-radius: 6px;
     font-size: 1rem;
-    color: #495057;
+    color: #ecf0f1; /* Light text for input */
+    background-color: #5d7f9e; /* Dark background for input */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .edit-form input:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    border-color: #6da2db; /* Brighter blue on focus */
+    box-shadow: 0 0 0 3px rgba(109, 162, 219, 0.4);
     outline: none;
 }
 
 .edit-form .btn-primary {
-    background-color: #28a745;
+    background-color: #2ecc71; /* Green for primary action */
     color: white;
     padding: 12px 20px;
     border: none;
@@ -351,7 +359,7 @@
 }
 
 .edit-form .btn-primary:hover {
-    background-color: #218838;
+    background-color: #27ae60;
 }
 
 /* Message Area for Modals (reusing existing styles) */
@@ -395,11 +403,11 @@
     /* Modal responsiveness */
     .modal-content {
         padding: 20px;
-        width: 95%; /* Make it wider on small screens */
+        width: 95%;
     }
 
     .large-modal {
-        max-width: 95%; /* Adjust for larger modal on mobile */
+        max-width: 95%;
     }
 
     .student-table th,
@@ -414,31 +422,32 @@
         width: 100%;
     }
     .student-table thead {
-        display: none; /* Hide header on mobile for stacked table */
+        display: none;
     }
     .student-table tr {
         margin-bottom: 10px;
-        border: 1px solid #ddd;
+        border: 1px solid #5d7f9e; /* Darker border */
         border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        background-color: #465b74; /* Consistent with other dark blocks */
     }
     .student-table td {
         text-align: right;
-        padding-left: 50%; /* Space for pseudo-label */
+        padding-left: 50%;
         position: relative;
         border: none;
-        border-bottom: 1px dashed #eee;
-        word-wrap: break-word; /* Allow long words to break */
-        white-space: normal;   /* Allow normal whitespace wrapping */
+        border-bottom: 1px dashed #5d7f9e; /* Darker dashed border */
+        word-wrap: break-word;
+        white-space: normal;
     }
     .student-table td::before {
-        content: attr(data-label); /* Use data-label for the label */
+        content: attr(data-label);
         position: absolute;
         left: 10px;
         width: calc(50% - 20px);
         text-align: left;
         font-weight: bold;
-        color: #555;
+        color: #aebfd0; /* Lighter grey for labels */
         font-size: 0.8rem;
     }
     .student-table td:last-child {
@@ -447,16 +456,16 @@
 
     .student-table .actions {
         display: flex;
-        flex-wrap: wrap; /* Allow buttons to wrap */
+        flex-wrap: wrap;
         justify-content: center;
         padding-top: 10px;
-        border-top: 1px solid #eee;
+        border-top: 1px solid #5d7f9e; /* Darker border */
         margin-top: 5px;
     }
 
     .student-table .btn-action {
-        flex: 1 1 auto; /* Allow buttons to grow and shrink */
-        margin: 5px; /* Adjust margin for wrapped buttons */
+        flex: 1 1 auto;
+        margin: 5px;
     }
 
     .edit-form .btn-primary {

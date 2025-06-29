@@ -1,0 +1,172 @@
+/* General Styling & Variables */
+:root {
+    --primary-color: #3498db; /* Consistent accent blue for highlights */
+    --secondary-color: #7f8c8d; /* Muted grey, good for subtle borders or inactive elements */
+    --accent-color: #2ecc71; /* Green for success/action */
+    --danger-color: #e74c3c; /* Red for errors/danger */
+
+    --bg-primary-dark: #2c3e50; /* Main body background, deepest dark */
+    --bg-medium-dark: #34495e; /* Background for main content sections/cards */
+    --bg-card-dark: #465b74; /* Background for nested cards or distinct elements */
+    --bg-sidebar-header-dark: #343a40; /* For header and sidebar background */
+
+    --text-light: #ecf0f1; /* Main text color on dark backgrounds (white-ish) */
+    --text-muted-light: #bdc3c7; /* Muted text color on dark backgrounds (light grey) */
+    --text-accent: var(--primary-color); /* For titles, important text that uses primary color */
+
+    --border-dark: #5d7f9e; /* Dark theme borders */
+    --card-shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.3); /* Darker shadow for dark theme */
+    --transition-speed: 0.3s ease; /* Standard transition speed */
+}
+
+body {
+    font-family: 'Inter', sans-serif; /* Consistent font */
+    background-color: var(--bg-primary-dark); /* Dark grey background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    color: var(--text-light); /* Default light text color */
+}
+
+/* --- Register Container (the main box) --- */
+.register-container {
+    background-color: var(--bg-medium-dark); /* Medium dark grey for the container */
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow-dark); /* Consistent dark theme shadow */
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.register-container h1 {
+    color: var(--text-light); /* Light text for heading */
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+/* --- Form Group Styling (labels and inputs) --- */
+.register-container .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.register-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-light); /* Light text for labels */
+    font-weight: bold;
+}
+
+.register-container input[type="text"],
+.register-container input[type="email"],
+.register-container input[type="password"],
+.register-container select {
+    width: 100%; /* Changed to 100% and rely on padding/box-sizing */
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid var(--border-dark); /* Dark theme border */
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+    background-color: var(--bg-card-dark); /* Darker input background */
+    color: var(--text-light); /* Light text in input fields */
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    -webkit-appearance: none; /* Remove default select styling for consistency */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23ecf0f1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Custom dropdown arrow */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+
+/* Placeholder text color for inputs */
+.register-container input::placeholder {
+    color: var(--text-muted-light); /* Muted light for placeholders */
+    opacity: 0.7;
+}
+
+.register-container input[type="text"]:focus,
+.register-container input[type="email"]:focus,
+.register-container input[type="password"]:focus,
+.register-container select:focus {
+    border-color: var(--primary-color); /* Accent blue on focus */
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.4); /* Subtle glow */
+    outline: none;
+}
+
+
+/* --- Button Styling --- */
+.register-container .btn {
+    background-color: var(--primary-color); /* Primary blue for register button */
+    color: var(--text-light); /* Light text */
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color var(--transition-speed);
+}
+.register-container .btn:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+}
+
+/* --- Message Area for Feedback --- */
+.register-container .message-area {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: left; /* Align messages to left for consistency with form */
+}
+.register-container .message-area.success {
+    background-color: rgba(46, 204, 113, 0.15); /* Green with transparency */
+    color: var(--accent-color); /* Green text */
+    border: 1px solid rgba(46, 204, 113, 0.4);
+}
+.register-container .message-area.error {
+    background-color: rgba(231, 76, 60, 0.15); /* Red with transparency */
+    color: var(--danger-color); /* Red text */
+    border: 1px solid rgba(231, 76, 60, 0.4);
+}
+
+/* --- Login Link --- */
+.register-container .login-link {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: var(--text-muted-light); /* Muted light grey */
+}
+.register-container .login-link a {
+    color: var(--primary-color); /* Link color is accent blue */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color var(--transition-speed);
+}
+.register-container .login-link a:hover {
+    text-decoration: underline;
+    color: #2980b9; /* Darker blue on hover */
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    .register-container {
+        padding: 20px;
+    }
+    .register-container h1 {
+        font-size: 1.8em;
+    }
+    .register-container .btn {
+        font-size: 1em;
+        padding: 10px 15px;
+    }
+}

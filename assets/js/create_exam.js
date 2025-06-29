@@ -75,17 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
             courseSelect.setAttribute('disabled', 'disabled');
             majorSelect.setAttribute('disabled', 'disabled');
         }
-    } else {
-        // For Admin (or non-faculty roles), ensure initial state is correct.
-        // The course select starts with "Select Course". If it ever has a value (e.g., from
-        // a saved form or pre-filling), then updateMajorsAndHiddenField() should be called
-        // with that value. Since it starts empty, no major should show.
-        // The key is that when an admin *selects* a course, the 'change' event listener
-        // will handle showing the majors.
-        // We don't need to call updateMajorsAndHiddenField() here for admins initially
-        // because the majorGroup is hidden by default and the dropdown is empty.
-        // The 'change' event listener on courseSelect will take care of it when an admin
-        // actually picks a course.
     }
 
 
@@ -166,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         add_question.placeholder = "Enter Question";
         add_question.name = `question_${question_count}`;
         add_question.id = `question_${question_count}`;
+        add_question.setAttribute('required', true);
 
         const question_label = document.createElement("label");
         question_label.textContent = `Question ${question_count}:`;
@@ -183,6 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
         add_answer.placeholder = "Enter Right Answer";
         add_answer.name = `answer_${question_count}`;
         add_answer.id = `answer_${question_count}`;
+        add_answer.setAttribute('required', true);
 
         const remove_question = document.createElement("button");
         remove_question.type = "button";
@@ -200,11 +191,18 @@ document.addEventListener('DOMContentLoaded', function() {
         add_div.appendChild(buttonContainer);
 
         const submit_button = document.getElementById("submit_button");
-        if (submit_button && submit_button.parentNode === parent) {
-            parent.insertBefore(add_div, submit_button);
+
+        // Find the last question container to append the new question and the button below it
+        const lastQuestionContainer = parent.querySelector('.question_container:last-of-type');
+        if (lastQuestionContainer) {
+            // Append the new question container below the last question container
+            lastQuestionContainer.parentNode.insertBefore(add_div, lastQuestionContainer.nextSibling);
         } else {
-            parent.insertBefore(add_div, add_button);
+            // If there are no questions, just insert the new one at the start
+            parent.appendChild(add_div);
         }
+            parent.appendChild(add_button);
+            parent.appendChild(submit_button);
 
         remove_question.addEventListener('click', () => {
             add_div.remove();
@@ -219,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
             choice.type = "text";
             choice.className = "choice-input";
             choice.placeholder = "Enter Choice";
+            choice.setAttribute('required', true);
 
             const currentQuestionDiv = choiceContainer.closest('.question_container');
             let currentQIndex = 1;
@@ -357,34 +356,101 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function showError(message) {
+        const errorContainer = document.getElementById('error-message-container');
+        const errorMessage = document.getElementById('error-message');
+        
+        errorMessage.textContent = message;
+        errorContainer.style.display = 'block'; // Show the error container
+
+        setTimeout(() => {
+            hideError();
+        }, 5000);
+    }
+
+    // Function to hide the error message
+    function hideError() {
+        const errorContainer = document.getElementById('error-message-container');
+        errorContainer.style.display = 'none'; // Hide the error container
+    }
+
     // Function to send form data (moved inside DOMContentLoaded)
     function sendFormData() {
         const questions = [];
         const questionContainers = document.querySelectorAll('.question_container');
+        let hasError = false; // Flag to track if there's any error during validation
 
-        // Iterate through each question container to build the 'questions' array
+        // Iterate through all the question containers to validate each question
         questionContainers.forEach((qContainer, index) => {
+            if (hasError) return; // Stop processing if there's already an error
+
             const questionText = qContainer.querySelector('.question-input').value;
             const answer = qContainer.querySelector('.answer-input').value;
             const choiceInputs = qContainer.querySelectorAll('.choice-input');
 
+            // Validate Question Text
+            if (!questionText) {
+                showError(`Question ${index + 1} cannot be empty.`);
+                hasError = true; // Set the flag to true, which will stop the loop
+                return; // Exit the current iteration if validation fails
+            }
+
+            // Validate Answer Text
+            if (!answer) {
+                showError(`Answer for Question ${index + 1} cannot be empty.`);
+                hasError = true; // Set the flag to true, which will stop the loop
+                return; // Exit the current iteration if validation fails
+            }
+
+            // Validate Choices (Ensure there are at least 1 choice)
+            if (choiceInputs.length === 0) {
+                showError(`At least one choice must be added for Question ${index + 1}.`);
+                hasError = true; // Set the flag to true, which will stop the loop
+                return; // Exit the current iteration if validation fails
+            }
+
             const choices = [];
-            // Iterate through each choice input within the current question
+            let hasEmptyChoice = false;
+
+            // Validate each choice input
             choiceInputs.forEach(choiceInput => {
-                choices.push({ "choice_text": choiceInput.value }); // Create choice objects
+                const choiceText = choiceInput.value.trim(); // Get and trim choice text
+
+                if (choiceText === "") {
+                    hasEmptyChoice = true; // Flag if a choice is empty
+                } else {
+                    choices.push({ "choice_text": choiceText }); // Push valid choice
+                }
             });
 
-            // Push the assembled question object into the 'questions' array
-            questions.push({
-                "question_text": questionText,
-                "answer": answer,
-                "choices": choices
-            });
+            if (hasEmptyChoice) {
+                showError(`All choices for Question ${index + 1} must have a value.`);
+                hasError = true; // Set the flag to true, which will stop the loop
+                return; // Exit the current iteration if validation fails
+            }
+
+            // Only push the question data if no error was found
+            if (!hasError) {
+                questions.push({
+                    "question_text": questionText,
+                    "answer": answer,
+                    "choices": choices
+                });
+            }
         });
+
+        // If there's an error at any point, stop form submission
+        if (hasError) {
+            return;
+        }
+
+        if (questions.length === 0) {
+            showError("There should be at least 1 question.");
+            return;
+        }
 
         const durationValue = document.getElementById('duration').value;
 
-        // Assemble the final JSON object to be sent
         const jsonObject = {
             "title": document.getElementById('title').value,
             "instruction": document.getElementById('instruction').value,
@@ -392,24 +458,23 @@ document.addEventListener('DOMContentLoaded', function() {
             "section": document.getElementById('section').value,
             "code": document.getElementById('code').value,
             "course": document.getElementById('course_major_db').value,
+            "subject": document.getElementById("subject").value,
             "duration_minutes": parseInt(durationValue, 10),
             "questions": questions
         };
 
-        // Make the fetch request with the correctly structured JSON
+        // Make the API call to submit the form data
         fetch("../api/exam.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(jsonObject) // Stringify the structured JSON
+            body: JSON.stringify(jsonObject)
         })
         .then(response => {
             if (!response.ok) {
-                // Improved error handling to log the server's error message
-                return response.json().then(err => {
-                    alert("Error submitting form: " + err.message);
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${err.message || JSON.stringify(err)}`);
+                return response.json().then(errorData => {
+                    throw new Error("Server error: " + (errorData.message || response.statusText || "Unknown error"));
                 });
             }
             return response.json();
@@ -419,9 +484,10 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("Form submitted successfully!");
             question_form.reset();
             document.querySelectorAll('.question_container').forEach(container => container.remove());
-            question_count = 1; // Reset question counter for new entries
-            reindexQuestions(); // Ensure UI state is consistent
+            question_count = 1;
+            reindexQuestions();
 
+            // Update course and major if necessary
             if (typeof isFaculty !== 'undefined' && isFaculty && typeof facultyAssignedCourseMajor !== 'undefined' && facultyAssignedCourseMajor) {
                 const parts = facultyAssignedCourseMajor.split(' : ', 2);
                 const facultyCourse = parts[0];
@@ -435,7 +501,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error("Error submitting form:", error);
+            showError("Error submitting form: " + error.message);
         });
     }
+
 
 });

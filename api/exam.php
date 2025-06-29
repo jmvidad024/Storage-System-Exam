@@ -33,8 +33,11 @@ $facultyCourse = null;
 // This course will be used for filtering exams.
 if ($loggedInUserRole === 'faculty') {
     $facultyCourse = $user->getFacultyCourseMajor($loggedInUserId);
+    $facultySubject = $user->getFacultySubject($loggedInUserId);
+    $facultyYear = $user->getFacultyYear($loggedInUserId);
+    $facultySection = $user->getFacultySection($loggedInUserId);
     // If a faculty member is not assigned a course, they cannot view/manage any exams.
-    if (!$facultyCourse) {
+    if (!$facultyCourse && !$facultySubject && !$facultyYear && !$facultySection) {
         http_response_code(403); // Forbidden
         echo json_encode(['status' => 'error', 'message' => 'Your faculty account is not assigned to a course. Please contact the administrator.']);
         exit();
@@ -52,14 +55,14 @@ switch ($method) {
                 $exam = $examModel->getExamById((int)$exam_id_filter);
 
                 // If faculty, perform an additional check to ensure the exam belongs to their course
-                if ($loggedInUserRole === 'faculty' && $exam && $exam['course'] !== $facultyCourse) {
+                if ($loggedInUserRole === 'faculty' && $exam && ($exam['course'] !== $facultyCourse || $exam['subject'] !== $facultySubject || $exam['year'] !== $facultyYear || $exam['section'] !== $facultySection)) {
                     http_response_code(403); // Forbidden
                     echo json_encode(['status' => 'error', 'message' => 'Unauthorized: This exam does not belong to your course.']);
                     exit();
                 }
 
                 if ($exam) {
-                    echo json_encode(['status' => 'success', 'exam' => $exam]);
+                    echo json_encode(['status' => 'successs', 'exam' => $exam]);
                     exit();
                 } else {
                     http_response_code(404);
@@ -71,7 +74,7 @@ switch ($method) {
                 $exam = $examModel->getExamByCode($code_filter);
 
                 // If faculty, perform an additional check to ensure the exam belongs to their course
-                if ($loggedInUserRole === 'faculty' && $exam && $exam['course'] !== $facultyCourse) {
+                if ($loggedInUserRole === 'faculty' && $exam && ($exam['course'] !== $facultyCourse || $exam['subject'] !== $facultySubject)) {
                     http_response_code(403); // Forbidden
                     echo json_encode(['status' => 'error', 'message' => 'Unauthorized: This exam does not belong to your course.']);
                     exit();
@@ -93,7 +96,25 @@ switch ($method) {
                     $all_exams = $examModel->getAllExams();
                 } elseif ($loggedInUserRole === 'faculty') {
                     // Faculty gets only exams for their assigned course
-                    $all_exams = $examModel->getExamsByCourse($facultyCourse);
+                    $all_exams = $examModel->getExamsByFacultyAssignment($facultyCourse, $facultySubject, $facultyYear, $facultySection);
+
+                    foreach ($all_exams as &$exam) {
+                        $exam_id = $exam['exam_id'];
+
+                        // Total students matching course, year, section
+                        $stmt = $database->getConnection()->prepare("SELECT COUNT(*) as total_students FROM students WHERE course = ? AND year = ? AND section = ?");
+                        $stmt->bind_param("sss", $exam['course'], $exam['year'], $exam['section']);
+                        $stmt->execute();
+                        $result = $stmt->get_result()->fetch_assoc();
+                        $exam['total_students'] = $result['total_students'];
+
+                        // Students who took the exam
+                        $stmt2 = $database->getConnection()->prepare("SELECT COUNT(DISTINCT user_id) as taken FROM student_exam_attempts WHERE exam_id = ?");
+                        $stmt2->bind_param("i", $exam_id);
+                        $stmt2->execute();
+                        $result2 = $stmt2->get_result()->fetch_assoc();
+                        $exam['students_taken'] = $result2['taken'];
+                    }
                 }
 
                 echo json_encode(['status' => 'success', 'exams' => $all_exams]);
@@ -137,7 +158,8 @@ switch ($method) {
                 !isset($data['code']) ||
                 !isset($data['course']) ||
                 !isset($data['duration_minutes']) ||
-                !is_numeric($data['duration_minutes'])
+                !is_numeric($data['duration_minutes']) ||
+                !isset($data['subject'])
             ) {
                 http_response_code(400); // Bad request for missing fields
                 echo json_encode(["status" => "error", "message" => "Missing required fields or invalid duration for new exam."]);
@@ -148,12 +170,12 @@ switch ($method) {
 
             $conn->begin_transaction();
 
-            $stmt = $conn->prepare("INSERT INTO exams (title, instruction, year, section, code, course, duration_minutes) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $conn->prepare("INSERT INTO exams (title, instruction, year, section, code, course, duration_minutes, subject) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             if (!$stmt) {
                 error_log("Prepare statement failed for exam: " . $conn->error);
                 throw new Exception("Prepare statement failed for exam: " . $conn->error);
             }
-            $stmt->bind_param("ssssssi", $data['title'], $data['instruction'], $data['year'], $data['section'], $data['code'], $data['course'], $duration_minutes);
+            $stmt->bind_param("ssssssis", $data['title'], $data['instruction'], $data['year'], $data['section'], $data['code'], $data['course'], $duration_minutes, $data['subject']);
             if (!$stmt->execute()) {
                 error_log("Execute failed for exam: " . $stmt->error);
                 throw new Exception("Execute failed for exam: " . $stmt->error);
@@ -251,7 +273,8 @@ switch ($method) {
                 $data['code'] ?? '',
                 $data['course'], // Use the course from the request, already validated if faculty
                 null, // Major is combined in $data['course']
-                (int)$duration_minutes
+                (int)$duration_minutes,
+                $data['subject'] ?? ''
             );
             if (!$update_main) {
                 throw new Exception("Failed to update main exam details.");

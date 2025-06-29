@@ -59,7 +59,7 @@ class User {
     }
 
     public function countStudents() {
-        $query = "SELECT COUNT(*) as student_count FROM " . $this->table_name . " WHERE role = 'student'";
+        $query = "SELECT COUNT(*) as student_count FROM " . $this->table_name . " WHERE role = 'student' AND is_verified = 1";
         $result = $this->conn->query($query); 
         if ($result) {
             $row = $result->fetch_assoc();
@@ -244,6 +244,63 @@ class User {
         return null;
     }
 
+    public function getFacultySubject($user_id){
+        $query = "SELECT subject FROM faculty_details WHERE user_id = ? LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("User::getFacultySubject - Prepare Error: " . $this->conn->error);
+            return null;
+        }
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['subject'];
+        }
+        return null;
+    }
+
+    public function getFacultyYear($user_id){
+        $query = "SELECT year FROM faculty_details WHERE user_id = ? LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("User::getFacultyYear - Prepare Error: " . $this->conn->error);
+            return null;
+        }
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['year'];
+        }
+        return null;
+    }
+
+    public function getFacultySection($user_id){
+        $query = "SELECT section FROM faculty_details WHERE user_id = ? LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log("User::getFacultySection - Prepare Error: " . $this->conn->error);
+            return null;
+        }
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['section'];
+        }
+        return null;
+    }
+
     public function findByUsername($username) {
         $query = "SELECT id, username, name, email, role, password_hash, is_verified FROM users WHERE username = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
@@ -298,15 +355,16 @@ class User {
         }
     }
 
-    public function createFacultyDetails($userId, $course = null) {
-        $query = "INSERT INTO faculty_details (user_id, course) VALUES (?, ?)";
+    public function createFacultyDetails($userId, $course, $subject) {
+        $query = "INSERT INTO faculty_details (user_id, course, subject) VALUES (?, ?, ?)";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("User::createFacultyDetails - Prepare Error: " . $this->conn->error);
             return false;
         }
         $course_sanitized = htmlspecialchars(strip_tags($course));
-        $stmt->bind_param('is', $userId, $course_sanitized);
+        $subject_sanitized = htmlspecialchars(strip_tags($subject));
+        $stmt->bind_param('iss', $userId, $course_sanitized, $subject_sanitized);
         if ($stmt->execute()) {
             $stmt->close();
             return true;
@@ -319,7 +377,7 @@ class User {
 
     public function getFullUserProfile($userId) {
         $query = "SELECT u.id, u.username, u.name, u.email, u.role, u.is_verified,
-                                    fd.course
+                                    fd.course, fd.subject, fd.section, fd.year
                              FROM " . $this->table_name . " u
                              LEFT JOIN faculty_details fd ON u.id = fd.user_id
                              WHERE u.id = ? LIMIT 1";
@@ -338,15 +396,16 @@ class User {
         return $row;
     }
 
-    public function updateFacultyCourse($userId, $newCourse) {
-        $query = "UPDATE faculty_details SET course = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+    public function updateFacultyCourse($userId, $newCourse, $newSubject) {
+        $query = "UPDATE faculty_details SET course = ?, subject = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("User::updateFacultyCourse - Prepare Error: " . $this->conn->error);
             return false;
         }
         $newCourse_sanitized = htmlspecialchars(strip_tags($newCourse));
-        $stmt->bind_param('si', $newCourse_sanitized, $userId);
+        $newSubject_sanitized = htmlspecialchars(strip_tags($newSubject));
+        $stmt->bind_param('ssi', $newCourse_sanitized, $newSubject_sanitized, $userId);
 
         if ($stmt->execute()) {
             $stmt->close();

@@ -50,7 +50,8 @@ if ($method === "GET") {
                 e.year, 
                 e.section, 
                 e.code, 
-                e.course -- Ensure 'course' column is selected
+                e.course,
+                e.subject -- Ensure 'course' column is selected
             FROM 
                 exams e
             WHERE 

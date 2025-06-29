@@ -38,7 +38,7 @@ class ExamModel {
             return false;
         }
 
-        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes FROM " . $this->exams_table . " WHERE exam_id = ? LIMIT 1";
+        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes, subject FROM " . $this->exams_table . " WHERE exam_id = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getExamById: Main exam query prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
@@ -209,7 +209,7 @@ class ExamModel {
      * @param int $duration_minutes // NEW PARAMETER
      * @return bool True on success, false on failure.
      */
-    public function updateExamMain($exam_id, $title, $instruction, $year, $section, $code, $course, $major = null, $duration_minutes) {
+    public function updateExamMain($exam_id, $title, $instruction, $year, $section, $code, $course, $major, $duration_minutes, $subject) {
         $full_course = $course;
         if (!empty($major)) {
             $full_course = $course . ' : ' . $major;
@@ -222,7 +222,8 @@ class ExamModel {
                         section = ?,
                         code = ?,
                         course = ?,
-                        duration_minutes = ?
+                        duration_minutes = ?,
+                        subject = ?
                     WHERE exam_id = ?";
 
         $stmt = $this->conn->prepare($query);
@@ -231,7 +232,7 @@ class ExamModel {
             throw new Exception("Prepare failed: " . $this->conn->error);
         }
 
-        $stmt->bind_param("ssisssii",
+        $stmt->bind_param("ssisssisi",
             $title,
             $instruction,
             $year,
@@ -239,6 +240,7 @@ class ExamModel {
             $code,
             $full_course,
             $duration_minutes,
+            $subject,
             $exam_id
         );
 
@@ -446,7 +448,7 @@ class ExamModel {
      * @return array An array of all exam records, or an empty array if none found.
      */
     public function getAllExams() {
-        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes FROM " . $this->exams_table . " ORDER BY title ASC";
+        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes, subject FROM " . $this->exams_table . " ORDER BY title ASC";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getAllExams: Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
@@ -467,6 +469,31 @@ class ExamModel {
         return $exams;
     }
 
+    public function getExamsByFacultyAssignment($courseMajor, $subject, $year, $section) {
+        $query = "SELECT * FROM exams 
+                  WHERE course = ? AND subject = ? AND year = ? AND section = ?";
+
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            die("Prepare failed: " . $this->conn->error);
+        }
+
+        $stmt->bind_param("ssis", $courseMajor, $subject, $year, $section);
+
+        if (!$stmt->execute()) {
+            die("Execute failed: " . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        $exams = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $exams[] = $row;
+        }
+
+        $stmt->close();
+        return $exams;
+    }
 
     /**
      * Fetches exams associated with a specific course.
@@ -474,18 +501,22 @@ class ExamModel {
      * @param string $course The combined course string (e.g., "BSIT : Web Development").
      * @return array An array of exam records for the given course, or an empty array if none found.
      */
-    public function getExamsByCourse($course) {
+    public function getExamsByCourseAndSubject($course, $subject) {
         if (empty($course)) {
-            error_log("ExamModel->getExamsByCourse: Empty course provided.");
+            error_log("ExamModel->getExamsByCourseAndSubject: Empty course provided.");
             return [];
         }
-        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes FROM " . $this->exams_table . " WHERE course = ? ORDER BY title ASC";
+        if (empty($subject)) {
+            error_log("ExamModel->getExamsByCourseAndSubject: Empty subject provided.");
+            return [];
+        }
+        $query = "SELECT exam_id, title, instruction, year, section, code, course, duration_minutes, subject FROM " . $this->exams_table . " WHERE course = ? AND subject = ? ORDER BY title ASC";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             error_log("ExamModel->getExamsByCourse: Prepare failed: (" . $this->conn->errno . ") " . $this->conn->error);
             return [];
         }
-        $stmt->bind_param("s", $course);
+        $stmt->bind_param("ss", $course, $subject);
         if (!$stmt->execute()) {
             error_log("ExamModel->getExamsByCourse: Execute failed: (" . $stmt->errno . ") " . $stmt->error);
             $stmt->close();

@@ -1,4 +1,5 @@
 <?php
+
 class AuthMiddleware {
     /**
      * Authenticates the user. If not logged in, redirects for browser requests
@@ -20,7 +21,7 @@ class AuthMiddleware {
                 exit();
             } else {
                 // Regular browser request, redirect to login page
-                header("Location: login.php");
+                header("Location: /view/login.php");
                 exit();
             }
         }
@@ -44,7 +45,7 @@ class AuthMiddleware {
                 echo json_encode(["status" => "error", "message" => "Unauthorized. Please log in."]);
                 exit();
             } else {
-                header("Location: login.php");
+                header("Location: /view/login.php");
                 exit();
             }
         }
@@ -70,7 +71,7 @@ class AuthMiddleware {
             } else {
                 // Regular browser request, redirect to an unauthorized page or dashboard with error
                 // You might have an 'unauthorized.php' page, or redirect to dashboard with a message
-                header("Location: dashboard.php?error=unauthorized_role");
+                header("Location: /view/dashboard.php?error=unauthorized_role");
                 exit();
             }
         }

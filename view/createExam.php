@@ -27,6 +27,9 @@ $faculty_assigned_course_major = null;
 if ($is_faculty) {
     // If faculty, fetch their assigned course_major from faculty_details table
     $faculty_assigned_course_major = $user->getFacultyCourseMajor($user->id);
+    $faculty_assigned_subject = $user->getFacultySubject($user->id);
+    $faculty_assigned_year = $user->getFacultyYear($user->id);
+    $faculty_assigned_section = $user->getFacultySection($user->id);
     if (!$faculty_assigned_course_major) {
         // Handle case where faculty user has no assigned course (e.g., redirect or error)
         $_SESSION['error_message'] = "Faculty account not assigned to a course. Please contact administrator.";
@@ -41,8 +44,9 @@ if ($is_faculty) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../assets/css/create_exam.css?v=3">
+    <link rel="stylesheet" href="../assets/css/create_exam.css">
     <title>Create Exam</title>
+    
 </head>
 <body>
 
@@ -51,22 +55,42 @@ if ($is_faculty) {
     <h1>Create Exam</h1>
 </header>
 
+
+
 <div class="form_layout">
+    
     <form action="" method="POST" id="question_form">
+        <div id="error-message-container" class="error-message-container" style="display: none;">
+    <p id="error-message"></p>
+</div>
         <div class="title_box">
             <input type="text" name="title" id="title" placeholder="Enter Title">
             <input type="text" name="instruction" id="instruction" placeholder="Enter Instruction">
 
-            <select name="year" id="year" required>
+            <select name="year" id="year" required
+            <?php if ($is_faculty): ?>
+                    disabled
+                <?php endif; ?>
+            >
                 <option value="">Select Year</option>
+                <?php   if($is_faculty):?>
+                    <option value="<?= htmlspecialchars($is_faculty ? ($faculty_assigned_year ?? '') : '') ?>" selected><?= htmlspecialchars($is_faculty ? ($faculty_assigned_year ?? '') : '') ?></option>
+                <?php endif; ?>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
             </select>
 
-            <select name="section" id="section" required>
+            <select name="section" id="section" required
+            <?php if ($is_faculty): ?>
+                    disabled
+                <?php endif; ?>
+            >
                 <option value="">Select Section</option>
+                <?php   if($is_faculty):?>
+                    <option value="<?= htmlspecialchars($is_faculty ? ($faculty_assigned_section ?? '') : '') ?>" selected><?= htmlspecialchars($is_faculty ? ($faculty_assigned_section ?? '') : '') ?></option>
+                <?php endif; ?>
                 <option value="A">A</option>
                 <option value="B">B</option>
                 <option value="C">C</option>
@@ -137,10 +161,17 @@ if ($is_faculty) {
                     }
                     ?>
                 </select>
-            </div>
+            </div> 
 
+            <input type="text" name="subject" id="subject" placeholder="Enter Subject" required
+            value="<?= htmlspecialchars($is_faculty ? ($faculty_assigned_subject ?? '') : '') ?>"
+            <?php if ($is_faculty): ?>
+                    disabled
+                <?php endif; ?>
+            >
             <input type="text" name="code" id="code" placeholder="Enter Exam Code" required>
-            <input type="number" id="duration" name="duration" min="1" placeholder="e.g., 60" required>
+            <input type="number" id="duration" name="duration" min="1" placeholder="Enter Duration(in minutes e.g. 60)" required>
+            
         </div>
 
         <button type="button" id="add_button">Add Question</button>

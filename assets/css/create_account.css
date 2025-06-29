@@ -7,8 +7,8 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #e9ecef; /* Light grey background */
-    color: #333;
+    background-color: #2c3e50; /* Dark blue/grey background */
+    color: #ecf0f1; /* Light text color for general body */
     line-height: 1.6;
     display: flex;
     flex-direction: column;
@@ -17,12 +17,12 @@ body {
 
 /* Page Header */
 .page-header {
-    background-color: #2c3e50; /* Dark blue/grey */
+    background-color: #343a40; /* Dark blue/grey */
     color: #ecf0f1;
     padding: 1.2rem 2.5rem;
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4); /* Darker shadow for depth */
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -39,7 +39,7 @@ body {
 
 /* Back Button Styling */
 .back-button {
-    background-color: #34495e;
+    background-color: #4a627a; /* Darker blue for the button */
     color: #fff;
     padding: 10px 20px;
     border-radius: 5px;
@@ -53,7 +53,7 @@ body {
 }
 
 .back-button:hover {
-    background-color: #4a627a;
+    background-color: #5d7f9e; /* Slightly lighter on hover */
     transform: translateX(-3px);
 }
 
@@ -68,17 +68,17 @@ body {
 
 /* Registration Form Section */
 .registration-form-section {
-    background-color: #ffffff;
+    background-color: #34495e; /* Medium dark grey for form background */
     border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* More pronounced shadow */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3); /* More pronounced shadow */
     padding: 40px;
     width: 100%;
-    max-width: 500px; /* Max width for the form */
-    text-align: center; /* Center the form content */
+    max-width: 500px;
+    text-align: center;
 }
 
 .registration-form-section h1 {
-    color: #2c3e50;
+    color: #ecf0f1; /* Light text color */
     margin-bottom: 30px;
     font-size: 2.2rem;
 }
@@ -87,18 +87,18 @@ body {
 .register-form {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Space between form groups */
+    gap: 20px;
 }
 
 .form-group {
-    text-align: left; /* Align labels and inputs to the left */
+    text-align: left;
 }
 
 .form-group label {
-    display: block; /* Make label take full width */
+    display: block;
     margin-bottom: 8px;
     font-weight: bold;
-    color: #555;
+    color: #ecf0f1; /* Light text color for labels */
     font-size: 1.05rem;
 }
 
@@ -108,27 +108,34 @@ body {
 .form-group select {
     width: 100%;
     padding: 14px 18px;
-    border: 1px solid #ced4da;
+    border: 1px solid #5d7f9e; /* Darker border */
     border-radius: 8px;
     font-size: 1.1rem;
-    color: #495057;
+    color: #ecf0f1; /* Light text color for inputs */
+    background-color: #5d7f9e; /* Dark background for inputs */
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    -webkit-appearance: none; /* Remove default arrow on select for custom styling */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23ecf0f1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Custom dropdown arrow */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
 }
 
 .form-group input:focus,
 .form-group select:focus {
-    border-color: #4a90e2; /* Accent blue on focus */
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
+    border-color: #6da2db; /* Brighter blue on focus */
+    box-shadow: 0 0 0 3px rgba(109, 162, 219, 0.4);
     outline: none;
 }
 
 .form-group input::placeholder {
-    color: #adb5bd;
+    color: #aebfd0; /* Lighter placeholder text */
 }
 
 /* Register Button */
 .btn-register {
-    background-color: #28a745; /* Green for registration */
+    background-color: #2ecc71; /* Green for registration */
     color: white;
     padding: 15px 30px;
     border: none;
@@ -137,14 +144,14 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    margin-top: 20px; /* Space above button */
-    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); /* Subtle shadow for button */
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2); /* Subtle shadow for button */
 }
 
 .btn-register:hover {
-    background-color: #218838;
+    background-color: #27ae60;
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.3);
 }
 
 /* Message Area Styling */
@@ -158,20 +165,41 @@ body {
 }
 
 .message-area .success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: #27ae60; /* Darker green */
+    color: white;
+    border: 1px solid #2ecc71;
 }
 
 .message-area .error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: #c0392b; /* Darker red */
+    color: white;
+    border: 1px solid #e74c3c;
 }
 
 .message-area .success a {
-    color: #155724; /* Keep link color consistent with success text */
+    color: #ecf0f1; /* Light link color consistent with success text */
     text-decoration: underline;
+}
+
+/* Student Fields Group (dynamic section) */
+.student-fields-group {
+    background-color: #465b74; /* Darker background for the section */
+    border: 1px solid #5d7f9e; /* Darker border */
+    border-radius: 8px;
+    padding: 25px;
+    margin-top: 20px;
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: inset 0 1px 5px rgba(0,0,0,0.1); /* Subtle inner shadow */
+}
+
+.student-fields-group h3 {
+    color: #6da2db; /* Blue accent for heading */
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #5d7f9e; /* Darker border */
+    padding-bottom: 10px;
 }
 
 /* Responsive Adjustments */
@@ -185,7 +213,7 @@ body {
 
     .page-header h1 {
         font-size: 1.7rem;
-        margin-left: 0; /* Reset negative margin on small screens */
+        margin-left: 0;
     }
 
     .back-button {
@@ -206,28 +234,6 @@ body {
         font-size: 1.1rem;
     }
 }
-.student-fields-group {
-    background-color: #f8f9fa; /* Light background for the section */
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 25px;
-    margin-top: 20px; /* Space above this section */
-    display: none; /* Hidden by default - JavaScript will toggle */
-    flex-direction: column;
-    gap: 15px; /* Space between student detail fields */
-    box-shadow: inset 0 1px 5px rgba(0,0,0,0.05); /* Subtle inner shadow */
-}
-
-.student-fields-group h3 {
-    color: #4a90e2; /* Blue accent for heading */
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 10px;
-}
-
-
-
 
 @media (max-width: 480px) {
     .page-header h1 {

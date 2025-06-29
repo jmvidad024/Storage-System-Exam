@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
+const loggedInUserRole = window.loggedInUserRole || '';
+    const loggedInUserSubject = window.loggedInUserSubject || '';
+
     const examEditForm = document.getElementById('exam_edit_form');
     const examIdHidden = document.getElementById('exam_id_hidden');
     const titleInput = document.getElementById('title');
@@ -11,11 +14,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const addQuestionBtn = document.getElementById('add_question_btn');
     const saveExamBtn = document.getElementById('save_exam_btn');
     const courseInput = document.getElementById('course'); // This refers to the course SELECT element
+    const subjectInput = document.getElementById('subject');
 
     const courseSelect = document.getElementById('course');
     const majorGroup = document.getElementById('major-group');
     const majorSelect = document.getElementById('major');
     const courseMajorDb = document.getElementById('course_major_db');
+
+
+    if (loggedInUserRole === 'faculty') {
+        yearSelect.setAttribute('disabled', true);
+        yearSelect.title = "You cannot change this subject.";
+
+        sectionSelect.setAttribute('disabled', true);
+        sectionSelect.title = "You cannot change this subject.";
+
+        subjectInput.setAttribute('disabled', true);
+        subjectInput.title = "You cannot change this subject.";
+
+        courseSelect.setAttribute('disabled', true);
+        courseSelect.title = "You cannot change this course.";
+
+        majorSelect.setAttribute('disabled', true);
+        majorSelect.title = "You cannot change this major.";
+    }
 
     // Define which courses have majors
     const majorsByCourse = {
@@ -183,6 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
         yearSelect.value = initialExamData.year;
         sectionSelect.value = initialExamData.section;
         codeInput.value = initialExamData.code;
+        subjectInput.value = initialExamData.subject;
         durationInput.value = initialExamData.duration_minutes; // Set duration value
 
         const fullCourseMajor = initialExamData.course || '';
@@ -235,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
             section: sectionSelect.value,
             code: codeInput.value.trim(),
             course: courseMajorDb.value.trim(),
+            subject: subjectInput.value.trim(),
             duration_minutes: parseInt(durationInput.value), // Include duration
             questions: []
         };

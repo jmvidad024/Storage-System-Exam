@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password</title>
-    <link rel="stylesheet" href="../assets/css/forgot_password.css"> <link rel="stylesheet" href="../assets/css/login.css"> </head>
+    <link rel="stylesheet" href="../assets/css/forgot_password.css">
+</head>
 <body>
     <div class="auth-container">
         <h2>Forgot Password</h2>

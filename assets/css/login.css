@@ -1,107 +1,212 @@
 :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --error-color: #f72585;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .login-container {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 420px;
-            padding: 40px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .login-container:hover {
-            box-shadow: var(--shadow-hover);
-            transform: translateY(-2px);
-        }
-        
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .login-header h1 {
-            color: var(--dark-color);
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        
-        .login-header p {
-            color: #6c757d;
-            font-size: 14px;
-        }
-        
-        .login-form .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .login-form label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--dark-color);
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .login-form input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .login-form input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-        
-        .login-form button {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        
-        .login-form button:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-1px);
-        }
-        
-        .login-form button:active {
-            transform: translateY(0);
-        }
-        
-        
+    --primary-color: #007bff; /* A vibrant blue for primary actions */
+    --secondary-color: #0056b3; /* Darker blue for hover states */
+    --error-color: #dc3545; /* Standard red for errors */
+    --success-color: #28a745; /* Green for success messages */
+    --text-color-light: #e9ecef; /* Light text for dark backgrounds */
+    --text-color-dark: #212529; /* Dark text for light backgrounds */
+    --background-dark: #2c3e50; /* Darker background for the body */
+    --card-background: #34495e; /* Slightly lighter background for the card */
+    --input-background: #495e72; /* Background for input fields */
+    --border-color: #5a708a; /* Border color for inputs/elements */
+    --shadow-light: rgba(0, 0, 0, 0.2);
+    --shadow-dark: rgba(0, 0, 0, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Added Inter for a modern look, fallback to Segoe UI */
+}
+
+body {
+    background: var(--background-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text-color-light);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.login-container {
+    background-color: var(--card-background);
+    border-radius: 15px; /* Slightly more rounded */
+    box-shadow: 0 10px 30px var(--shadow-dark); /* More pronounced shadow */
+    width: 100%;
+    max-width: 450px; /* Slightly wider */
+    padding: 50px; /* More padding */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    position: relative; /* For potential absolute positioning of elements */
+    overflow: hidden; /* Ensures shadows/borders are contained */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+}
+
+.login-container:hover {
+    transform: translateY(-5px); /* More noticeable lift */
+    box-shadow: 0 15px 40px var(--shadow-dark);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 35px; /* More space */
+    position: relative;
+    z-index: 1; /* Ensure text is above any background effects */
+}
+
+.login-header h1 {
+    color: var(--text-color-light);
+    font-size: 32px; /* Larger title */
+    margin-bottom: 10px;
+    font-weight: 700; /* Bolder */
+}
+
+.login-header p {
+    color: rgba(255, 255, 255, 0.7); /* Lighter subtitle */
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 25px; /* More space between form groups */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-color-light);
+    font-weight: 600; /* Bolder label */
+    font-size: 15px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 18px; /* More padding */
+    background-color: var(--input-background);
+    color: var(--text-color-light);
+    border: 1px solid var(--border-color);
+    border-radius: 10px; /* Slightly more rounded */
+    font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.4); /* Lighter placeholder text */
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.3); /* Clearer focus indication */
+    background-color: #556a80; /* Slight change on focus */
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px; /* More padding */
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 10px; /* Matching input fields */
+    font-size: 18px; /* Larger font */
+    font-weight: 700; /* Bolder font */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    letter-spacing: 0.5px; /* Slightly spaced letters */
+    text-transform: uppercase; /* Uppercase for prominence */
+}
+
+button[type="submit"]:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px); /* More noticeable lift */
+    box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3); /* Shadow on hover */
+}
+
+button[type="submit"]:active {
+    transform: translateY(0);
+    background-color: #004499; /* Darker on click */
+    box-shadow: none;
+}
+
+.message-area {
+    margin-top: 30px; /* More space */
+    padding: 12px 20px; /* More padding */
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: center;
+    line-height: 1.4;
+    transition: all 0.3s ease-in-out; /* Smooth transition for display */
+}
+
+/* Specific styles for error messages */
+.message-area[style*="display: block"] {
+    animation: fadeInScale 0.4s ease-out forwards;
+}
+
+.message-area.error {
+    background-color: rgba(220, 53, 69, 0.15); /* Lighter, more transparent background */
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+}
+
+.message-area.success {
+    background-color: rgba(40, 167, 69, 0.15);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.link-area {
+    text-align: center;
+    margin-top: 30px; /* Space between form and links */
+    font-size: 15px;
+}
+
+.link-area p {
+    margin-bottom: 10px; /* Space between paragraphs if multiple */
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.link-area a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.link-area a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+    .login-container {
+        padding: 30px 25px; /* Reduce padding on smaller screens */
+        margin: 0 15px; /* Add horizontal margin */
+    }
+
+    .login-header h1 {
+        font-size: 28px;
+    }
+
+    .form-group input,
+    button[type="submit"] {
+        font-size: 15px;
+        padding: 12px 15px;
+    }
+}

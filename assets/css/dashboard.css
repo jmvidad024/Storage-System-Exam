@@ -1,4 +1,24 @@
-/* Basic Resets */
+/* General Styling & Variables */
+:root {
+    --primary-color: #3498db; /* Consistent accent blue for highlights */
+    --secondary-color: #7f8c8d; /* Muted grey, good for subtle borders or inactive elements */
+    --accent-color: #2ecc71; /* Green for success/action */
+    --danger-color: #e74c3c; /* Red for errors/danger */
+
+    --bg-primary-dark: #2c3e50; /* Main body background, deepest dark */
+    --bg-medium-dark: #34495e; /* Background for main content sections/cards */
+    --bg-card-dark: #465b74; /* Background for nested cards or distinct elements */
+    --bg-sidebar-header-dark: #343a40; /* For header and sidebar background */
+
+    --text-light: #ecf0f1; /* Main text color on dark backgrounds (white-ish) */
+    --text-muted-light: #bdc3c7; /* Muted text color on dark backgrounds (light grey) */
+    --text-accent: var(--primary-color); /* For titles, important text that uses primary color */
+
+    --border-dark: #5d7f9e; /* Dark theme borders */
+    --card-shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.3); /* Darker shadow for dark theme */
+    --transition-speed: 0.3s ease; /* Standard transition speed */
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,286 +26,420 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f7f6; /* Light grey background */
-    color: #333;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary-dark); /* Changed to primary dark background */
+    color: var(--text-light); /* Default text color is light */
     line-height: 1.6;
-    display: flex; /* Use flexbox for layout */
-    min-height: 100vh; /* Ensure body takes full viewport height */
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
 }
 
 /* Header Styling */
-header {
-    background-color: #2c3e50; /* Dark blue/grey */
-    color: #ecf0f1; /* Light grey text */
+.main-header {
+    background-color: var(--bg-sidebar-header-dark); /* Consistent dark background */
+    color: var(--text-light);
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    width: 100%; /* Make header full width */
-    position: fixed; /* Fix header at the top */
+    box-shadow: var(--card-shadow-dark); /* Using dark theme shadow */
+    width: 100%;
+    position: fixed;
     top: 0;
     left: 0;
-    z-index: 1000; /* Ensure header is on top of other elements */
+    z-index: 1000;
 }
 
-header h1 {
-    margin: 0;
+.main-header .logo {
     font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-light); /* Logo text is light */
+    text-decoration: none;
+    transition: opacity var(--transition-speed);
+}
+
+.main-header .logo:hover {
+    opacity: 0.8;
 }
 
 .header-right {
     display: flex;
     align-items: center;
+    gap: 20px;
 }
 
 .welcome-message {
-    margin-right: 15px;
     font-size: 0.95rem;
-    color: #bdc3c7; /* Slightly darker light grey */
+    color: var(--text-muted-light); /* Muted light text */
 }
 
-/* Dropdown Styling */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-toggle {
-    background-color: #34495e; /* Slightly lighter dark blue */
+.btn-logout {
+    background-color: var(--danger-color);
     color: white;
-    padding: 10px 15px;
+    padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background-color 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color var(--transition-speed), transform 0.1s ease;
 }
 
-.dropdown-toggle:hover {
-    background-color: #4a627a;
-}
-
-.arrow-down {
-    font-size: 0.8rem;
-}
-
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    background-color: #34495e; /* Same as button */
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    right: 0; /* Align to the right of the button */
-    border-radius: 5px;
-    overflow: hidden; /* For rounded corners on internal elements */
-    margin-top: 5px;
-}
-
-.dropdown-menu.show {
-    display: block;
-}
-
-.dropdown-menu form {
-    margin: 0; /* Remove default form margin */
-}
-
-#logout-button {
-    color: white;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    border: none;
-    background: none;
-    width: 100%; /* Make button fill dropdown width */
-    text-align: left;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
-}
-
-
-/* assets/css/dashboard.css */
-
-/* ... existing CSS ... */
-
-.dashboard-metric {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-top: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.dashboard-metric h4 {
-    margin-top: 0;
-    color: #333;
-    font-size: 1.1em;
-}
-
-.dashboard-metric .metric-value {
-    font-size: 2.5em;
-    font-weight: bold;
-    color: #007bff; /* A nice blue, adjust as needed */
-    margin-bottom: 0;
-}
-#logout-button:hover {
-    background-color: #2c3e50; /* Darker on hover */
-    opacity: .5;
+.btn-logout:hover {
+    background-color: #c0392b; /* Darker red */
+    transform: translateY(-1px);
 }
 
 /* Sidebar Styling */
 .sidebar {
-    background-color: #34495e; /* Dark blue/grey, slightly lighter than header */
-    color: #ecf0f1;
-    width: 250px; /* Fixed width for sidebar */
-    padding-top: 80px; /* Space for fixed header */
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    flex-shrink: 0; /* Prevent sidebar from shrinking */
-    position: fixed; /* Fixed sidebar */
+    background-color: var(--bg-sidebar-header-dark); /* Consistent dark background */
+    color: var(--text-light);
+    width: 250px;
+    padding-top: 75px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4); /* Darker shadow */
+    flex-shrink: 0;
+    position: fixed;
     height: 100vh;
     top: 0;
     left: 0;
-    overflow-y: auto; /* Enable scrolling if content is long */
+    overflow-y: auto;
+    transition: width var(--transition-speed);
 }
 
-.sidebar h2 {
+.sidebar-title {
     padding: 20px;
     margin-bottom: 10px;
-    color: #fff;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-light); /* Sidebar title is light */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 1.4rem;
+    font-weight: 600;
 }
 
-.sidebar ul {
+.sidebar-menu {
     list-style: none;
+    padding: 0;
 }
 
-.sidebar ul li a {
-    display: block;
-    color: #ecf0f1;
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light); /* Sidebar menu links are light */
     padding: 15px 20px;
     text-decoration: none;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color var(--transition-speed), color var(--transition-speed), border-left var(--transition-speed);
+    font-size: 1rem;
 }
 
-.sidebar ul li a:hover,
-.sidebar ul li a.active {
-    background-color: #2c3e50; /* Darker on hover/active */
-    color: #ffffff;
-    border-left: 5px solid #2980b9; /* Accent color */
-    padding-left: 15px; /* Adjust padding for border */
+.sidebar-menu li a:hover,
+.sidebar-menu li a.active {
+    background-color: var(--bg-medium-dark); /* Darker on hover/active */
+    color: white; /* Keep white for active state for strong contrast */
+    border-left: 5px solid var(--primary-color);
+    padding-left: 15px;
 }
+
+/* Icons (Placeholder - integrate Font Awesome or similar) */
+.icon-home::before { content: '🏠'; }
+.icon-create-exam::before { content: '✍️'; }
+.icon-manage-exams::before { content: '📋'; }
+.icon-manage-courses::before { content: '📚'; }
+.icon-create-account::before { content: '👤'; }
+.icon-pending-account::before { content: '⏳'; }
+
 
 /* Main Content Area */
-.content {
-    flex-grow: 1; /* Allow content to take remaining space */
-    padding: 80px 20px 20px 270px; /* Space for fixed header and sidebar */
-    background-color: #f9f9f9; /* Slightly lighter background for content */
+.content-area {
+    flex-grow: 1;
+    padding: 95px 30px 30px 280px;
+    background-color: var(--bg-primary-dark); /* Main content area background */
+    transition: margin-left var(--transition-speed);
 }
 
-.content h2 {
-    font-size: 2rem;
-    color: #2c3e50;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
+.page-title {
+    font-size: 2.5rem;
+    color: var(--text-light); /* Page title text is light */
+    margin-bottom: 15px;
+    font-weight: 700;
+    border-bottom: 2px solid var(--border-dark); /* Dark theme border */
     padding-bottom: 10px;
 }
 
-.content p {
-    margin-bottom: 15px;
-    color: #555;
+.page-description {
+    font-size: 1.1rem;
+    color: var(--text-muted-light); /* Page description is muted light */
+    margin-bottom: 30px;
 }
 
-/* Role-specific panels */
-.admin-panel,
-.faculty-panel,
-.user-panel {
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
+/* Dashboard Sections / Panels */
+.dashboard-section {
+    background-color: var(--bg-medium-dark); /* Consistent dark background for sections */
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: var(--card-shadow-dark); /* Dark theme shadow */
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    border-radius: 8px; /* Added border-radius for consistency with cards */
+}
+
+.dashboard-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Darker hover shadow */
+}
+
+.section-title {
+    color: var(--text-accent); /* Section title uses accent blue */
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+    background-color: var(--bg-card-dark); /* Background for title box within section */
+    padding: 10px 15px; /* Added padding for the title background */
     border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Darker shadow */
 }
 
-.admin-panel h3, .faculty-panel h3, .user-panel h3 {
-    color: #2980b9; /* Blue accent */
-    margin-bottom: 15px;
-    font-size: 1.5rem;
-}
-
-.admin-panel p, .faculty-panel p, .user-panel p {
+.section-description {
     font-size: 1rem;
-    color: #666;
+    color: var(--text-muted-light); /* Section description is muted light */
+    margin-bottom: 25px;
+    background-color: var(--bg-card-dark); /* Background for description box within section */
+    padding: 10px 15px; /* Added padding for description background */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Darker shadow */
 }
 
-/* Responsive adjustments (optional but recommended) */
-@media (max-width: 768px) {
-    body {
-        flex-direction: column; /* Stack header, sidebar, content on small screens */
+/* Metric Cards */
+.dashboard-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.dashboard-metric-card {
+    background-color: var(--bg-card-dark); /* Background for metric cards */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Darker shadow */
+    padding: 20px;
+    text-align: center;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    margin-bottom: 25px; /* Kept existing margin-bottom */
+}
+
+.dashboard-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Darker hover shadow */
+}
+
+.metric-title {
+    font-size: 1.1rem;
+    color: var(--text-muted-light); /* Metric title is muted light */
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.metric-value {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--text-accent); /* Metric value uses accent blue */
+    line-height: 1;
+}
+
+/* Info/Error Messages */
+.info-message, .error-message {
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-top: 20px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.info-message {
+    background-color: rgba(52, 152, 219, 0.15); /* Primary color with transparency */
+    color: var(--primary-color);
+    border: 1px solid rgba(52, 152, 219, 0.4);
+}
+
+.error-message {
+    background-color: rgba(231, 76, 60, 0.15); /* Danger color with transparency */
+    color: var(--danger-color);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+}
+
+
+/* Specific card styles for student/faculty sections */
+.student-info-card, .faculty-section-card {
+    background-color: var(--bg-card-dark); /* Background for info cards */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Darker shadow */
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: var(--card-shadow-dark); /* Dark theme shadow */
+}
+
+.student-info-card h4, .faculty-section-card .card-title {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.student-info-card p, .faculty-section-card .card-description {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
     }
 
-    header {
-        position: static; /* Remove fixed header on small screens */
+    .header-right {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .welcome-message {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .sidebar {
+        width: 200px;
+        padding-top: 120px;
+    }
+
+    .content-area {
+        padding: 130px 20px 20px 220px;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    .main-header {
+        position: static;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
         padding: 1rem;
-        flex-wrap: wrap; /* Allow items to wrap */
     }
 
     .header-left, .header-right {
-        width: 100%;
-        text-align: center;
-        margin-bottom: 10px;
+        width: auto;
+        margin-bottom: 0;
+    }
+    
+    .welcome-message {
+        display: none;
     }
 
     .sidebar {
         width: 100%;
-        position: static; /* Remove fixed sidebar */
-        height: auto; /* Auto height */
-        padding-top: 0; /* No need for padding-top due to fixed header */
+        position: static;
+        height: auto;
+        padding-top: 0;
+        box-shadow: none;
+        border-bottom: 1px solid var(--border-dark); /* Dark theme border */
     }
 
-    .sidebar h2 {
+    .sidebar-title {
         text-align: center;
         padding: 15px;
+        border-bottom: none;
     }
 
-    .sidebar ul {
-        display: flex; /* Make nav items horizontal */
+    .sidebar-menu {
+        display: flex;
         flex-wrap: wrap;
         justify-content: center;
         padding-bottom: 10px;
     }
 
-    .sidebar ul li {
-        flex-grow: 1; /* Allow items to grow */
+    .sidebar-menu li {
+        flex-grow: 1;
         text-align: center;
         margin: 5px;
     }
     
-    .sidebar ul li a {
+    .sidebar-menu li a {
         padding: 10px 15px;
-        border-left: none !important; /* Remove sidebar border */
-        border-bottom: 3px solid transparent; /* Add bottom border for active state */
-        transition: border-bottom 0.3s ease;
+        border-left: none !important;
+        border-bottom: 3px solid transparent;
+        flex-direction: column;
+        gap: 5px;
     }
 
-    .sidebar ul li a:hover,
-    .sidebar ul li a.active {
-        border-bottom: 3px solid #2980b9;
-        background-color: #2c3e50; /* Maintain hover background */
-        padding-left: 15px; /* Reset padding */
+    .sidebar-menu li a:hover,
+    .sidebar-menu li a.active {
+        border-bottom: 3px solid var(--primary-color);
+        background-color: var(--bg-medium-dark); /* Maintain hover background */
+        padding-left: 15px;
     }
 
+    .content-area {
+        padding: 20px;
+        margin-left: 0;
+    }
 
-    .content {
-        padding: 20px; /* Adjust padding for no fixed header/sidebar */
+    .dashboard-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-metric-card,
+    .dashboard-section,
+    .student-info-card,
+    .faculty-section-card {
+        padding: 20px;
+    }
+
+    .page-title, .section-title {
+        font-size: 1.8rem;
+    }
+
+    .metric-value {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header .logo {
+        font-size: 1.5rem;
+    }
+
+    .btn-logout {
+        padding: 8px 15px;
+        font-size: 0.8rem;
+    }
+    
+    .sidebar-menu li a {
+        font-size: 0.9rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+    }
+
+    .metric-value {
+        font-size: 2rem;
     }
 }

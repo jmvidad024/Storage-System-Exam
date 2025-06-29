@@ -1,0 +1,252 @@
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+
+.page-header {
+    background-color: #343a40;
+    color: #ecf0f1;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    flex-grow: 1;
+    text-align: center;
+    margin-left: -120px;
+}
+
+.back-button {
+    background-color: #4a627a;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    outline: none;
+}
+
+.back-button:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+.back-button:hover {
+    background-color: #5d7f9e;
+    transform: translateX(-3px);
+}
+
+/* Main Container for Pending Registrations */
+.pending-users-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #34495e; /* Medium dark grey for the container */
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Darker shadow */
+    color: #ecf0f1; /* Light text color for container content */
+}
+
+.pending-users-container h1 {
+    text-align: center;
+    color: #ecf0f1; /* Light text for heading */
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+}
+
+/* Message Area (Success/Error banners) */
+.message-area {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    display: none;
+    text-align: center;
+    font-size: 1.05rem;
+}
+
+.message-area.success {
+    background-color: #27ae60; /* Darker green */
+    color: white;
+    border: 1px solid #2ecc71;
+}
+
+.message-area.error {
+    background-color: #c0392b; /* Darker red */
+    color: white;
+    border: 1px solid #e74c3c;
+}
+
+/* Table for Pending Users */
+.pending-users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #465b74; /* Darker background for table itself */
+    border-radius: 8px; /* Apply border radius to the table for visual consistency */
+    overflow: hidden; /* Ensures border-radius applies */
+}
+
+.pending-users-table th, .pending-users-table td {
+    border: 1px solid #5d7f9e; /* Darker border */
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+    color: #ecf0f1; /* Light text color for table cells */
+}
+
+.pending-users-table th {
+    background-color: #5d7f9e; /* Darker header background */
+    font-weight: bold;
+    color: #ecf0f1; /* Light text color for headers */
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.pending-users-table tr:nth-child(even) {
+    background-color: #4f6782; /* Slightly different dark shade for zebra striping */
+}
+
+.pending-users-table tr:hover {
+    background-color: #6da2db; /* Blue on hover */
+}
+
+/* Action Buttons within table */
+.action-buttons button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    color: white; /* Ensure text is white */
+}
+
+.action-buttons .approve-btn {
+    background-color: #2ecc71; /* Green for approve */
+}
+
+.action-buttons .approve-btn:hover {
+    background-color: #27ae60;
+    transform: translateY(-1px);
+}
+
+.action-buttons .reject-btn {
+    background-color: #e74c3c; /* Red for reject */
+}
+
+.action-buttons .reject-btn:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+}
+
+.no-pending-message {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 1.1em;
+    color: #bdc3c7; /* Lighter grey for informative message */
+}
+
+/* Responsive Adjustments for Table */
+@media (max-width: 768px) {
+    .pending-users-container {
+        padding: 15px;
+        margin: 15px auto;
+    }
+
+    .pending-users-container h1 {
+        font-size: 1.8rem;
+    }
+
+    /* Stack table columns */
+    .pending-users-table,
+    .pending-users-table tbody,
+    .pending-users-table tr,
+    .pending-users-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .pending-users-table thead {
+        display: none; /* Hide header on mobile for stacked table */
+    }
+
+    .pending-users-table tr {
+        margin-bottom: 15px;
+        border: 1px solid #5d7f9e; /* Darker border for stacked rows */
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        background-color: #465b74; /* Consistent background for stacked rows */
+    }
+
+    .pending-users-table td {
+        text-align: right;
+        padding-left: 50%; /* Space for pseudo-label */
+        position: relative;
+        border: none;
+        border-bottom: 1px dashed #7f8c8d; /* Darker dashed border */
+        word-wrap: break-word;
+        white-space: normal;
+        font-size: 0.95rem;
+    }
+
+    /* Pseudo-element for labels */
+    .pending-users-table td::before {
+        content: attr(data-label); /* Uses data-label from PHP */
+        position: absolute;
+        left: 10px;
+        width: calc(50% - 20px);
+        text-align: left;
+        font-weight: bold;
+        color: #aebfd0; /* Lighter grey for labels */
+        font-size: 0.9rem;
+    }
+
+    .pending-users-table td:last-child {
+        border-bottom: none;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end; /* Align buttons to the right */
+        padding-top: 10px;
+        border-top: 1px solid #5d7f9e;
+        margin-top: 5px;
+        gap: 5px; /* Small gap between buttons */
+    }
+    .action-buttons button {
+        flex: 1 1 auto; /* Allow buttons to grow and wrap */
+        margin-right: 0; /* Remove individual margin as gap handles it */
+    }
+}
+
+@media (max-width: 480px) {
+    .pending-users-container h1 {
+        font-size: 1.6rem;
+    }
+    .action-buttons button {
+        font-size: 0.85em;
+        padding: 6px 10px;
+    }
+    .no-pending-message {
+        font-size: 1em;
+    }
+}

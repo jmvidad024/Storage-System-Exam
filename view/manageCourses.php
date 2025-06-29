@@ -50,13 +50,14 @@ if (isset($_POST['logout'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Courses & Sections</title>
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
     <link rel="stylesheet" href="../assets/css/manage_courses.css"> <!-- New CSS for this page -->
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
+    <header class="main-header">
         <div class="header-left">
-            <h1>Inventory System</h1>
+            <h1>Exam System</h1>
         </div>
         <div class="header-right">
             <span class="welcome-message">Welcome, <?php echo htmlspecialchars($userName); ?>! (Role: <?php echo htmlspecialchars($userRole); ?>)</span>
@@ -67,19 +68,22 @@ if (isset($_POST['logout'])) {
     </header>
 
     <nav class="sidebar">
-        <h2>Navigation</h2>
-        <ul>
-            <li><a href="dashboard.php" class="nav-link">Dashboard Home</a></li>
-            <li><a href="createExam.php" class="nav-link">Create Exam</a></li>
-            <li><a href="getExam.php" class="nav-link">Manage Exams</a></li>
-            <li><a href="manageCourses.php" class="nav-link active">Manage Courses & Sections</a></li>
+        <h2 class="sidebar-title">Navigation</h2>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.php" class="nav-link active"><i class="icon-home"></i> Dashboard Home</a></li>
+            <?php if ($userRole === 'admin' || $userRole === 'faculty'): ?>
+                <li><a href="createExam.php" class="nav-link"><i class="icon-create-exam"></i> Create Exam</a></li>
+                <li><a href="getExam.php" class="nav-link"><i class="icon-manage-exams"></i> Manage Exams</a></li>
+            <?php endif; ?>
             <?php if ($userRole === 'admin'): ?>
-                <li><a href="createAccount.php" class="nav-link">Create Account</a></li>
+                <li><a href="manageCourses.php" class="nav-link"><i class="icon-manage-courses"></i> Manage Courses & Sections</a></li>
+                <li><a href="createAccount.php" class="nav-link"><i class="icon-create-account"></i> Create Account</a></li>
+                <li><a href="pending_registration.php" class="nav-link"><i class="icon-pending-account"></i> Pending Accounts</a></li>
             <?php endif ?>
         </ul>
     </nav>
 
-    <main class="content">
+    <main class="content-area">
         <h2>Course and Section Management</h2>
         <p>This page allows you to view and manage your courses, year levels, and sections based on existing student data.</p>
 

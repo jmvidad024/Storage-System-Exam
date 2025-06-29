@@ -1,4 +1,23 @@
 /* Specific styles for editExam.php */
+:root {
+    --primary-color: #3498db; /* Consistent accent blue for highlights */
+    --secondary-color: #7f8c8d; /* Muted grey, good for subtle borders or inactive elements */
+    --accent-color: #2ecc71; /* Green for success/action */
+    --danger-color: #e74c3c; /* Red for errors/danger */
+
+    --bg-primary-dark: #2c3e50; /* Main body background, deepest dark */
+    --bg-medium-dark: #34495e; /* Background for main content sections/cards */
+    --bg-card-dark: #465b74; /* Background for nested cards or distinct elements */
+    --bg-sidebar-header-dark: #343a40; /* For header and sidebar background */
+
+    --text-light: #ecf0f1; /* Main text color on dark backgrounds (white-ish) */
+    --text-muted-light: #bdc3c7; /* Muted text color on dark backgrounds (light grey) */
+    --text-accent: var(--primary-color); /* For titles, important text that uses primary color */
+
+    --border-dark: #5d7f9e; /* Dark theme borders */
+    --card-shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.3); /* Darker shadow for dark theme */
+    --transition-speed: 0.3s ease; /* Standard transition speed */
+}
 
 /* Overall Page Layout - Ensure full viewport height and flexible layout */
 html, body {
@@ -7,21 +26,22 @@ html, body {
     width: 100%;
     height: 100%; /* Ensure html and body take full viewport height */
     font-family: 'Inter', sans-serif; /* Consistent font */
-    background-color: #f0f2f5; /* Light gray background for the page */
+    background-color: var(--bg-primary-dark); /* Dark gray background for the page */
     display: flex;
     flex-direction: column; /* Make body a flex container for its children */
     overflow-x: hidden; /* Prevent horizontal scroll */
+    color: var(--text-light); /* Default light text color */
 }
 
 /* Header Styling - For "Edit Exam" page */
 .page-header {
-    background-color: #2c3e50; /* Dark blue-gray */
-    color: white;
+    background-color: var(--bg-sidebar-header-dark); /* Dark blue-gray from theme variables */
+    color: var(--text-light); /* Light text from theme variables */
     padding: 15px 20px;
     display: flex;
     justify-content: space-between; /* Space out back button and title */
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow-dark); /* Darker shadow from theme variables */
     position: sticky; /* Make header sticky */
     top: 0;
     z-index: 1000; /* Ensure it stays on top */
@@ -33,8 +53,29 @@ html, body {
     margin: 0;
     font-size: 1.8rem;
     flex-grow: 1; /* Allow title to take available space */
-    margin-left: -150px;
+    margin-left: -150px; /* Keep original margin for centering */
     text-align: center; /* Center the title in the remaining space */
+    color: var(--text-light); /* Ensure title is light */
+}
+
+/* Back button (assuming common style, but included here for completeness) */
+.back-button {
+    background-color: var(--bg-medium-dark); /* Slightly lighter dark blue for the button */
+    color: var(--text-light); /* Light text */
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none; /* Remove underline from link */
+    font-size: 1rem;
+    transition: background-color var(--transition-speed), transform 0.2s ease;
+    display: flex; /* For arrow icon and text alignment */
+    align-items: center;
+    gap: 8px; /* Space between arrow and text */
+    font-weight: bold;
+}
+
+.back-button:hover {
+    background-color: var(--bg-card-dark); /* Darker blue on hover */
+    transform: translateX(-3px); /* Subtle slide effect to the left */
 }
 
 /* Main Content Container - Encapsulates the form section */
@@ -47,55 +88,75 @@ html, body {
     box-sizing: border-box; /* Include padding in element's total width and height */
     overflow-y: auto; /* Allow vertical scrolling if content overflows */
 }
+
+/* Title Box (for exam general details) */
 .title_box {
-    background-color: #f8f9fa; /* Slightly lighter background */
+    background-color: var(--bg-card-dark); /* Slightly lighter dark background */
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Subtle shadow */
-    padding: 25px; /* Ample padding */
-    margin-bottom: 20px; /* Space below the title box */
-    display: flex; /* Use flex for internal layout of title/instruction/year/section/code */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* Darker subtle shadow */
+    padding: 25px;
+    margin-bottom: 20px;
+    display: flex;
     flex-direction: column;
-    gap: 15px; /* Space between inputs/labels */
-    border-left: 5px solid #007bff; /* Accent border, blue to match save button */
+    gap: 15px;
+    border-left: 5px solid var(--primary-color); /* Accent border, blue */
+    color: var(--text-light); /* Default text color for title box */
 }
 
 .title_box label {
     font-weight: bold;
-    color: #34495e;
+    color: var(--text-light); /* Light text for labels */
     font-size: 1.05rem;
-    margin-bottom: 5px; /* Space between label and input */
+    margin-bottom: 5px;
 }
 
 .title_box input[type="text"],
+.title_box input[type="number"],
 .title_box select {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-dark); /* Dark theme border */
     border-radius: 6px;
     font-size: 1rem;
     box-sizing: border-box;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    background-color: var(--bg-medium-dark); /* Darker input background */
+    color: var(--text-light); /* Light text for input field */
+    -webkit-appearance: none; /* Remove default select styling for consistency */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23ecf0f1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Custom dropdown arrow */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
 }
 
 .title_box input[type="text"]:focus,
 .title_box select:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    border-color: var(--primary-color); /* Accent blue on focus */
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.4); /* Subtle glow */
     outline: none;
 }
 
-/* Form Section Styling */
+/* Placeholder text color */
+.title_box input::placeholder {
+    color: var(--text-muted-light); /* Muted light for placeholders */
+    opacity: 0.7;
+}
+
+/* Form Section Styling (main exam form area) */
 .form-section {
-    background-color: #ffffff;
+    background-color: var(--bg-medium-dark); /* Medium dark grey for main form background */
     border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow-dark); /* Darker shadow */
     padding: 40px;
     width: 100%;
-    max-width: 900px; /* Max width for readability */
+    max-width: 900px;
     display: flex;
     flex-direction: column;
     gap: 30px;
     box-sizing: border-box;
+    color: var(--text-light); /* Default text color for form section */
 }
 
 /* Adjusting some elements for edit form */
@@ -108,64 +169,67 @@ html, body {
 .form-group-inline label {
     margin-bottom: 8px;
     font-weight: bold;
-    color: #555;
+    color: var(--text-light); /* Light text for labels */
     font-size: 1.05rem;
 }
 
 /* Question Block styling - similar to create_exam.css but with remove button */
 .question-block {
-    position: relative; /* For absolute positioning of remove button */
+    position: relative;
     padding: 25px;
-    background-color: #f8f9fa;
+    background-color: var(--bg-card-dark); /* Darker background for question blocks */
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px; /* Space between questions */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Darker subtle shadow */
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    border-left: 5px solid #2980b9; /* Accent border */
+    border-left: 5px solid var(--primary-color); /* Accent border */
+    color: var(--text-light); /* Default text for question block */
 }
 
 .question-block label {
     font-weight: bold;
-    color: #555;
+    color: var(--text-light); /* Light text for labels */
 }
 
 .question-block input[type="text"] {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-dark); /* Dark theme border */
     border-radius: 6px;
     font-size: 16px;
     box-sizing: border-box;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    background-color: var(--bg-medium-dark); /* Darker input background */
+    color: var(--text-light); /* Light text for input */
 }
 
 .question-block input[type="text"]:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    border-color: var(--primary-color); /* Accent blue on focus */
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.4); /* Subtle glow */
     outline: none;
 }
 
 .question-block h3 {
     font-size: 1.4rem;
-    color: #2c3e50;
+    color: var(--text-light); /* Light text for question heading */
     margin-bottom: 10px;
-    border-bottom: 1px dashed #ced4da;
+    border-bottom: 1px dashed var(--border-dark); /* Dark theme dashed border */
     padding-bottom: 10px;
 }
 
 .choices-section {
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-dark); /* Dark theme border */
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
 .choices-section h4 {
-    color: #555;
+    color: var(--text-light); /* Light text for choices title */
     font-size: 1.1rem;
     margin-bottom: 10px;
 }
@@ -180,24 +244,26 @@ html, body {
 .choice-item input[type="text"] {
     flex-grow: 1; /* Allow input to take most space */
     padding: 10px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-dark); /* Dark theme border */
     border-radius: 6px;
     font-size: 1rem;
+    background-color: var(--bg-medium-dark); /* Darker input background */
+    color: var(--text-light); /* Light text for choice input */
 }
 
 .remove-choice-btn, .remove-question-btn {
     padding: 8px 12px;
-    background-color: #dc3545; /* Red */
+    background-color: var(--danger-color); /* Red */
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color var(--transition-speed), transform 0.2s ease;
 }
 
 .remove-choice-btn:hover, .remove-question-btn:hover {
-    background-color: #c82333;
+    background-color: #c0392b; /* Darker red */
     transform: translateY(-1px);
 }
 
@@ -205,18 +271,18 @@ html, body {
 #add_question_btn {
     align-self: flex-start; /* Align left below the form */
     margin-top: 20px;
-    background-color: #28a745; /* Green */
+    background-color: var(--primary-color); /* Blue for adding */
     color: white;
     padding: 12px 25px;
     border-radius: 8px;
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color var(--transition-speed), transform 0.2s ease;
 }
 
 #add_question_btn:hover {
-    background-color: #218838;
+    background-color: #2980b9; /* Darker blue */
     transform: translateY(-2px);
 }
 
@@ -228,16 +294,16 @@ html, body {
     font-size: 1.1rem;
     font-weight: bold;
     border-radius: 8px;
-    background-color: #007bff;
+    background-color: var(--accent-color); /* Green for saving */
     color: white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: var(--card-shadow-dark);
+    transition: background-color var(--transition-speed), transform 0.2s ease, box-shadow var(--transition-speed);
 }
 
 #save_exam_btn:hover {
-    background-color: #0056b3;
+    background-color: #27ae60; /* Darker green */
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35); /* Darker hover shadow */
 }
 
 /* Message Area (re-using from create_exam/get_exam CSS) */
@@ -248,117 +314,119 @@ html, body {
     font-size: 1.05rem;
     font-weight: bold;
     text-align: center;
-    display: block; /* Show messages dynamically */
+    /* display: block; removed as JS typically controls visibility */
 }
 
 .message-area.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: rgba(46, 204, 113, 0.15); /* Green with transparency */
+    color: var(--accent-color); /* Green text */
+    border: 1px solid rgba(46, 204, 113, 0.4);
 }
 
 .message-area.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: rgba(231, 76, 60, 0.15); /* Red with transparency */
+    color: var(--danger-color); /* Red text */
+    border: 1px solid rgba(231, 76, 60, 0.4);
 }
 
 .message-area.loading {
-    background-color: #e2f0fb;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+    background-color: rgba(52, 152, 219, 0.15); /* Light blue with transparency from primary-color */
+    color: var(--primary-color); /* Primary color text */
+    border: 1px solid rgba(52, 152, 219, 0.4);
     animation: pulse 1.5s infinite;
 }
 
+/* Modal Styles - For confirmation/info popups */
 .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 2000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0; /* Start hidden for fade-in effect */
-            visibility: hidden; /* Hide completely */
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
-            display: flex; /* Now it's flex, so justify/align center applies */
-        }
-        .modal-content {
-            background-color: #ffffff;
-            margin: auto;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-        .modal-content h2 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.8rem;
-        }
-        .modal-content p {
-            margin-bottom: 25px;
-            font-size: 1.1rem;
-            color: #555;
-        }
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        .modal-buttons .btn {
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .modal-buttons .btn-confirm {
-            background-color: #28a745; /* Green */
-            color: white;
-        }
-        .modal-buttons .btn-confirm:hover {
-            background-color: #218838;
-        }
-        .modal-buttons .btn-cancel {
-            background-color: #6c757d; /* Grey */
-            color: white;
-        }
-        .modal-buttons .btn-cancel:hover {
-            background-color: #5a6268;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Buttons for delete attempts */
-        .delete-attempts-btn {
-            background-color: #dc3545; /* Red */
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 20px; /* Space above */
-            align-self: flex-start; /* Align left */
-        }
-        .delete-attempts-btn:hover {
-            background-color: #c82333;
-            transform: translateY(-1px);
-        }
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8); /* Darker overlay */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-speed), visibility var(--transition-speed);
+}
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+    display: flex; /* Now it's flex, so justify/align center applies */
+}
+.modal-content {
+    background-color: var(--bg-medium-dark); /* Medium dark for modal content */
+    margin: auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5); /* Stronger dark shadow */
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+    color: var(--text-light); /* Default text color for modal content */
+}
+.modal-content h2 {
+    color: var(--text-light); /* Light text for modal heading */
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+.modal-content p {
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+    color: var(--text-muted-light); /* Muted light text for paragraph */
+}
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.modal-buttons .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.2s ease;
+    color: white; /* Default white text for modal buttons */
+    border: none; /* Ensure no default border */
+}
+.modal-buttons .btn-confirm {
+    background-color: var(--accent-color); /* Green for confirm */
+}
+.modal-buttons .btn-confirm:hover {
+    background-color: #218838;
+}
+.modal-buttons .btn-cancel {
+    background-color: var(--secondary-color); /* Grey for cancel */
+}
+.modal-buttons .btn-cancel:hover {
+    background-color: #6c7a7d;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Buttons for delete attempts */
+.delete-attempts-btn {
+    background-color: var(--danger-color); /* Red */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.2s ease;
+    margin-top: 20px;
+    align-self: flex-start; /* Align left */
+    border: none; /* Ensure no default border */
+}
+.delete-attempts-btn:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
 
 /* Make form-group-inline take full width on small screens */
 @media (max-width: 768px) {
@@ -369,10 +437,11 @@ html, body {
         flex-direction: column; /* Stack items vertically */
         padding: 10px 15px;
     }
-    /* Assuming .back-button styles are global and don't need explicit media query here */
+    /* Adjust margin-left for header h1 on smaller screens */
     .page-header h1 {
         font-size: 1.5rem;
         margin-top: 10px; /* Add space between button and title when stacked */
+        margin-left: 0; /* Reset negative margin for small screens */
     }
 
     .form-section {
@@ -380,7 +449,7 @@ html, body {
     }
 
     /* Keep these specific overrides as they might be intentional for form elements */
-    .form-row {
+    .form-row { /* Assuming .form-row exists as a flex container */
         flex-direction: column;
     }
     .form-group-inline {

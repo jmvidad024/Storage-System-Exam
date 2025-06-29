@@ -27,10 +27,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         displayMessage('error', 'Missing exam, user, attempt ID, or invalid exam duration. Cannot load exam.');
         return;
     }
-
-    // --- Pre-Exam System Checks ---
-    const MIN_DESKTOP_WIDTH = 1200;
-    const MIN_DESKTOP_HEIGHT = 700;
+    //SCREEN SIZE
+    const MIN_DESKTOP_WIDTH = screen.width * 0.8;
+    const MIN_DESKTOP_HEIGHT = screen.height * 0.8;
 
     if (!isMobile) {
         const currentWidth = window.innerWidth;

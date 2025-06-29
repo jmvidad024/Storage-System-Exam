@@ -32,6 +32,7 @@ if (isset($_GET['status']) && isset($_GET['message'])) {
     $message = htmlspecialchars($_GET['message']);
 }
 
+$facultyDetails = $user->getFullUserProfile($user->id);
 ?>
 
 <!DOCTYPE html>
@@ -48,7 +49,7 @@ if (isset($_GET['status']) && isset($_GET['message'])) {
         <a href="getExam.php" class="back-button">&larr; Back to Manage Exams</a>
         <h1>Edit Exam</h1>
     </header>
-
+    
     <div class="container">
         <div class="form-section">
             <?php if (!empty($message)): ?>
@@ -111,8 +112,15 @@ if (isset($_GET['status']) && isset($_GET['message'])) {
                         </div>
                     </div>
                     
-                    <label for="code">Exam Code</label>
-                    <input type="text" name="code" id="code" placeholder="Enter Exam Code" required>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" name="subject" id="subject" placeholder="Enter Subject">
+                </div>
+
+                    <div class="form-group">
+                        <label for="code">Exam Code</label>
+                        <input type="text" name="code" id="code" placeholder="Enter Exam Code" required>
+                    </div>
 
                     <div class="form-group">
                         <label for="duration_minutes">Duration (minutes)</label>
@@ -147,6 +155,11 @@ if (isset($_GET['status']) && isset($_GET['message'])) {
 
     <!-- NEW: This div passes the PHP exam data to JavaScript -->
     <div id="exam_initial_data" data-initial-exam-data='<?php echo $exam_data_json; ?>'></div>
+
+    <script>
+        window.loggedInUserRole = '<?php echo $user->role;?>';
+        window.loggedInUserSubject = '<?php echo $facultyDetails['subject']; ?>';
+    </script>
 
     <!-- JavaScript to handle dynamic form and submission -->
     <script src="../assets/js/edit_exam.js"></script>

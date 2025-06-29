@@ -1,0 +1,176 @@
+/* General Styling & Variables */
+:root {
+    --primary-color: #3498db; /* Consistent accent blue for highlights */
+    --secondary-color: #7f8c8d; /* Muted grey, good for subtle borders or inactive elements */
+    --accent-color: #2ecc71; /* Green for success/action */
+    --danger-color: #e74c3c; /* Red for errors/danger */
+
+    --bg-primary-dark: #2c3e50; /* Main body background, deepest dark */
+    --bg-medium-dark: #34495e; /* Background for main content sections/cards */
+    --bg-card-dark: #465b74; /* Background for nested cards or distinct elements */
+    --bg-sidebar-header-dark: #343a40; /* For header and sidebar background */
+
+    --text-light: #ecf0f1; /* Main text color on dark backgrounds (white-ish) */
+    --text-muted-light: #bdc3c7; /* Muted text color on dark backgrounds (light grey) */
+    --text-accent: var(--primary-color); /* For titles, important text that uses primary color */
+
+    --border-dark: #5d7f9e; /* Dark theme borders */
+    --card-shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.3); /* Darker shadow for dark theme */
+    --transition-speed: 0.3s ease; /* Standard transition speed */
+}
+
+.exam-card canvas {
+    margin-top: 10px;
+}
+
+/* Add this to your existing CSS file (e.g., assets/css/main_dashboard.css or a new specific faculty_dashboard.css if appropriate) */
+
+.exam-card {
+    background-color: var(--bg-medium-dark); /* A distinct dark background for the card */
+    border-radius: 8px; /* Soften the corners */
+    box-shadow: var(--card-shadow-dark); /* Consistent dark theme shadow */
+    padding: 25px; /* Ample internal spacing */
+    margin-bottom: 25px; /* Space between multiple exam cards */
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed); /* Smooth hover effects */
+    position: relative; /* For any absolute positioning inside, e.g., badges */
+    overflow: hidden; /* Ensures border-radius applies cleanly */
+}
+
+.exam-card:hover {
+    transform: translateY(-3px); /* Subtle lift effect on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45); /* Enhanced shadow on hover */
+}
+
+.exam-card h2 { /* For the main exam title like "Science Final Exam" */
+    font-size: 2.2rem;
+    color: var(--text-accent); /* Accent blue for the main title */
+    margin-bottom: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+    border-bottom: 2px solid var(--border-dark); /* Subtle separator */
+    padding-bottom: 10px;
+}
+
+.exam-card p { /* For general text like Code, Instruction, Year & Section */
+    font-size: 1rem;
+    color: var(--text-muted-light); /* Muted light grey for descriptive text */
+    margin-bottom: 8px; /* Spacing between lines of info */
+    line-height: 1.5;
+}
+
+.exam-card p strong { /* For labels like "Code:", "Instruction:" */
+    color: var(--text-light); /* Slightly brighter light grey for labels */
+    font-weight: 600;
+    margin-right: 5px; /* Space between label and value */
+}
+
+.exam-card .exam-stats { /* Container for total students, taken, etc. */
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--secondary-color); /* Dashed line for subtle separation */
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 15px 30px; /* Space between stat items */
+    align-items: center;
+}
+
+.exam-card .exam-stat-item {
+    font-size: 1.1rem;
+    color: var(--text-light); /* Light text for stat values */
+    font-weight: 500;
+}
+
+.exam-card .exam-stat-item strong {
+    font-size: 1.2rem;
+    color: var(--text-accent); /* Accent color for the actual numbers */
+    font-weight: 700;
+    margin-right: 5px;
+}
+
+/* Style for the "Loading exams..." text, if present */
+.loading-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--text-muted-light);
+    padding: 40px 20px;
+}
+
+/* Donut Chart Specific Styling (assuming a canvas or SVG) */
+/* The actual chart rendering depends on your JS library (e.g., Chart.js) */
+.chart-container {
+    max-width: 250px; /* Control chart size */
+    margin: 25px auto 0 auto; /* Center the chart and provide top margin */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    color: var(--text-muted-light);
+}
+
+.chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-legend-color-box {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+/* Example colors for the donut chart segments based on theme */
+.chart-legend-color-box.taken {
+    background-color: var(--accent-color); /* Green for "Taken" */
+}
+
+.chart-legend-color-box.remaining {
+    background-color: var(--secondary-color); /* Muted grey for "Remaining" */
+    /* If you want a subtle red for remaining, you could use a lighter rgba(var(--danger-color), 0.5) */
+}
+
+/* Responsive adjustments for the exam card */
+@media (max-width: 768px) {
+    .exam-card {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .exam-card h2 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+    .exam-card p {
+        font-size: 0.95rem;
+    }
+    .exam-card .exam-stats {
+        flex-direction: column; /* Stack stats vertically */
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .exam-card .exam-stat-item {
+        font-size: 1rem;
+    }
+    .chart-container {
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .exam-card h2 {
+        font-size: 1.6rem;
+    }
+    .chart-container {
+        max-width: 180px;
+    }
+    .chart-legend {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

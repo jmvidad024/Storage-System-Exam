@@ -1,5 +1,23 @@
-/* Specific styles for takeExam.php */
+/* General Styling & Variables */
+:root {
+    --primary-color: #3498db; /* Consistent accent blue for highlights */
+    --secondary-color: #7f8c8d; /* Muted grey, good for subtle borders or inactive elements */
+    --accent-color: #2ecc71; /* Green for success/action */
+    --danger-color: #e74c3c; /* Red for errors/danger */
 
+    --bg-primary-dark: #2c3e50; /* Main body background, deepest dark */
+    --bg-medium-dark: #34495e; /* Background for main content sections/cards */
+    --bg-card-dark: #465b74; /* Background for nested cards or distinct elements */
+    --bg-sidebar-header-dark: #343a40; /* For header and sidebar background */
+
+    --text-light: #ecf0f1; /* Main text color on dark backgrounds (white-ish) */
+    --text-muted-light: #bdc3c7; /* Muted text color on dark backgrounds (light grey) */
+    --text-accent: var(--primary-color); /* For titles, important text that uses primary color */
+
+    --border-dark: #5d7f9e; /* Dark theme borders */
+    --card-shadow-dark: 0 4px 15px rgba(0, 0, 0, 0.3); /* Darker shadow for dark theme */
+    --transition-speed: 0.3s ease; /* Standard transition speed */
+}
 /* Overall Page Layout - Ensure full viewport height and flexible layout */
 html, body {
     margin: 0;
@@ -7,21 +25,22 @@ html, body {
     width: 100%;
     height: 100%; /* Ensure html and body take full viewport height */
     font-family: 'Inter', sans-serif; /* Consistent font, assuming it's imported elsewhere or default */
-    background-color: #f0f2f5; /* Light gray background for the page */
+    background-color: var(--bg-primary-dark); /* Dark gray background for the page */
     display: flex;
     flex-direction: column; /* Make body a flex container for its children */
     overflow-x: hidden; /* Prevent horizontal scroll */
+    color: var(--text-light); /* Default light text color */
 }
 
 /* Header Styling - For "Take Exam" page */
 .page-header {
-    background-color: #2c3e50; /* Dark blue-gray */
-    color: white;
+    background-color: var(--bg-sidebar-header-dark); /* Dark blue-gray from theme variables */
+    color: var(--text-light); /* Light text from theme variables */
     padding: 15px 20px;
     display: flex;
     justify-content: space-between; /* Space out back button and title */
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow-dark); /* Darker shadow from theme variables */
     position: sticky; /* Make header sticky */
     top: 0;
     z-index: 1000; /* Ensure it stays on top */
@@ -35,16 +54,17 @@ html, body {
     flex-grow: 1; /* Allow title to take available space */
     margin-left: -120px; /* Fine-tune this based on back-button width */
     text-align: center; /* Center the title in the remaining space */
+    color: var(--text-light); /* Ensure title is light */
 }
 
 .back-button {
-    background-color: #34495e; /* Slightly lighter dark blue for the button */
-    color: #fff;
+    background-color: var(--bg-medium-dark); /* Slightly lighter dark blue for the button from theme variables */
+    color: var(--text-light); /* Light text from theme variables */
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none; /* Remove underline from link */
     font-size: 1rem;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color var(--transition-speed), transform 0.2s ease; /* Use theme transition speed */
     display: flex; /* For arrow icon and text alignment */
     align-items: center;
     gap: 8px; /* Space between arrow and text */
@@ -52,7 +72,7 @@ html, body {
 }
 
 .back-button:hover {
-    background-color: #4a627a; /* Darker blue on hover */
+    background-color: var(--bg-card-dark); /* Darker blue on hover from theme variables */
     transform: translateX(-3px); /* Subtle slide effect to the left */
 }
 
@@ -69,41 +89,41 @@ html, body {
 
 /* Main exam content container */
 .exam-content-section {
-    background-color: #ffffff;
+    background-color: var(--bg-medium-dark); /* Medium dark grey for the exam section from theme variables */
     border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow-dark); /* Darker shadow from theme variables */
     padding: 40px;
     width: 100%; /* Take full width of its parent (.container's flex item) */
     max-width: 900px; /* Max width for readability */
-    /* margin: 30px auto; Removed as container now centers it */
     display: flex;
     flex-direction: column;
     gap: 30px;
     box-sizing: border-box; /* Include padding in element's total width and height */
+    color: var(--text-light); /* Ensure text within this section is light */
 }
 
 /* Exam Header (Title, Instructions, Details) - Specific to content section */
 #exam_header {
     text-align: center;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--border-dark); /* Dark theme border */
     padding-bottom: 25px;
 }
 
 #exam_header h2 {
-    color: #2c3e50;
+    color: var(--text-light); /* Light text for heading */
     font-size: 2.5rem;
     margin-bottom: 10px;
 }
 
 #exam_header p {
-    color: #666;
+    color: var(--text-muted-light); /* Muted light text */
     font-size: 1.1rem;
     line-height: 1.5;
     margin-bottom: 5px;
 }
 
 #exam_header p strong {
-    color: #4a90e2;
+    color: var(--primary-color); /* Accent blue for strong text */
 }
 
 /* Exam Form and Questions */
@@ -120,24 +140,25 @@ html, body {
 }
 
 .question-block {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background-color: var(--bg-card-dark); /* Darker card background for questions */
+    border: 1px solid var(--border-dark); /* Dark theme border */
     border-radius: 10px;
     padding: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2); /* Slightly lighter shadow for nested card */
+    color: var(--text-light); /* Ensure text within question block is light */
 }
 
 .question-block h3 {
-    color: #34495e;
+    color: var(--text-light); /* Light text for question numbers */
     font-size: 1.6rem;
     margin-bottom: 15px;
-    border-bottom: 1px dashed #ced4da;
+    border-bottom: 1px dashed var(--border-dark); /* Dark theme dashed border */
     padding-bottom: 10px;
 }
 
 .question-block .question-text {
     font-size: 1.2rem;
-    color: #444;
+    color: var(--text-light); /* Light text for question text */
     margin-bottom: 20px;
     font-weight: 500;
 }
@@ -151,46 +172,47 @@ html, body {
 .choice-item {
     display: flex;
     align-items: center;
-    background-color: #ffffff;
-    border: 1px solid #e9ecef;
+    background-color: var(--bg-medium-dark); /* Use medium dark for choice item background */
+    border: 1px solid var(--border-dark); /* Dark theme border */
     border-radius: 8px;
     padding: 12px 15px;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed); /* Use theme transition speed */
     cursor: pointer;
 }
 
 .choice-item:hover {
-    background-color: #f0f4f7;
-    border-color: #cce0ff;
+    background-color: var(--bg-card-dark); /* Darker on hover */
+    border-color: var(--primary-color); /* Accent blue border on hover */
 }
 
 .choice-item input[type="radio"],
 .choice-item input[type="text"] {
     margin-right: 12px;
     transform: scale(1.2); /* Slightly larger radio buttons */
-    accent-color: #4a90e2; /* Accent color for radio */
+    accent-color: var(--primary-color); /* Accent color for radio */
     flex-shrink: 0; /* Prevent shrinking */
+    background-color: var(--bg-card-dark); /* Dark input background */
+    color: var(--text-light); /* Light text */
+    border: 1px solid var(--border-dark); /* Dark border for text inputs */
 }
 
 .choice-item input[type="text"] {
     flex-grow: 1; /* Allow text input to fill space */
     padding: 8px 10px;
-    border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 1rem;
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
 }
 
 .choice-item input[type="text"]:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    border-color: var(--primary-color); /* Accent blue on focus */
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Subtle glow */
 }
-
 
 .choice-item label {
     font-size: 1.1rem;
-    color: #333;
+    color: var(--text-light); /* Light text for labels */
     cursor: pointer;
     flex-grow: 1; /* Allow label to take remaining space */
 }
@@ -203,16 +225,16 @@ html, body {
     font-size: 1.2rem;
     font-weight: bold;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    background-color: #28a745; /* Green */
-    color: white;
+    box-shadow: var(--card-shadow-dark); /* Consistent dark theme shadow */
+    background-color: var(--accent-color); /* Green from theme variables */
+    color: var(--text-light); /* Light text */
     border: none;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color var(--transition-speed), transform 0.2s ease;
 }
 
 #submit_exam_btn:hover {
-    background-color: #218838;
+    background-color: #218838; /* Darker green */
     transform: translateY(-1px);
 }
 
@@ -228,27 +250,27 @@ html, body {
 }
 
 .message-area.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: rgba(46, 204, 113, 0.15); /* Green with transparency */
+    color: var(--accent-color); /* Green text */
+    border: 1px solid rgba(46, 204, 113, 0.4);
 }
 
 .message-area.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: rgba(231, 76, 60, 0.15); /* Red with transparency */
+    color: var(--danger-color); /* Red text */
+    border: 1px solid rgba(231, 76, 60, 0.4);
 }
 
 .message-area.loading {
-    background-color: #e2f0fb;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
+    background-color: rgba(52, 152, 219, 0.15); /* Light blue with transparency from primary-color */
+    color: var(--primary-color); /* Primary color text */
+    border: 1px solid rgba(52, 152, 219, 0.4);
     animation: pulse 1.5s infinite; /* Re-use pulse animation */
 }
 
 .loading-message, .no-questions-message {
     text-align: center;
-    color: #888;
+    color: var(--text-muted-light); /* Muted light text */
     font-style: italic;
     padding: 50px;
 }
